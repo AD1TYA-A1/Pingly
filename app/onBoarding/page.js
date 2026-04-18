@@ -78,6 +78,11 @@ export default function Onboarding() {
 
   const totalSteps = 3;
 
+  const submit = ()=>{
+    console.log(form);
+    
+  }
+
   return (
     <>
       <div>
@@ -85,7 +90,7 @@ export default function Onboarding() {
         <div>
 
 
-          <div className=" bg-black flex items-center justify-center overflow-x-hidden">
+          <div className=" bg-black min-h-screen flex items-center justify-center overflow-x-hidden">
             <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
             <div className="absolute w-80 h-80 rounded-full bg-amber-500/8 blur-3xl pointer-events-none" />
 
@@ -282,7 +287,14 @@ export default function Onboarding() {
                     </button>
                   )}
                   <button
-                    onClick={() => { if (step < totalSteps) setStep(step + 1); else router.push("/chat"); }}
+                    onClick={() => {
+                      if (step < totalSteps) setStep(step + 1); else {
+                        // router.push("/chat"); 
+                        submit
+                        // console.log(form);
+
+                      }
+                    }}
                     className="flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20"
                   >
                     {step === totalSteps ? "Enter the chat →" : "Continue"}
