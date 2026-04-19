@@ -16,6 +16,7 @@ const AVATAR_COLORS = [
 
 const EMOJIS = ["🔥", "⚡", "💀", "🚀", "👑", "🎯", "💎", "🌙", "⚔️", "🦅"];
 
+
 export default function Onboarding() {
   const [step, setStep] = useState(1);
   const [preview, setPreview] = useState(null);
@@ -28,8 +29,10 @@ export default function Onboarding() {
     emoji: "🔥",
     tagline: "",
   });
+  const [avatar, setAvatar] = useState("")
   const canvasRef = useRef(null);
   const fileRef = useRef(null);
+  const [isloading, setIsloading] = useState(false)
   const router = useRouter();
 
   useEffect(() => {
@@ -66,8 +69,11 @@ export default function Onboarding() {
 
   const handleFile = (file) => {
     if (!file || !file.type.startsWith("image/")) return;
+    setAvatar(file)
     const url = URL.createObjectURL(file);
     setPreview(url);
+
+
   };
 
   const onDrop = (e) => {
@@ -78,9 +84,36 @@ export default function Onboarding() {
 
   const totalSteps = 3;
 
-  const submit = ()=>{
-    console.log(form);
-    
+  async function submit() {
+    setIsloading(true)
+    try {
+      // console.log(form);
+      // console.log(preview);
+
+      // Upload to Cloudinary via API route
+      const formData = new FormData();
+      formData.append('image', avatar);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+      console.log(data);
+
+      setForm(prev => ({ ...prev, avatarUrl: data.url })); // save cloud URL
+
+      console.log(form);
+
+    } catch (error) {
+      console.error('Upload failed:', err);
+    }
+    finally {
+      setIsloading(false);  // stop loading whether success or fail
+    }
+
+
   }
 
   return (
@@ -286,19 +319,37 @@ export default function Onboarding() {
                       Back
                     </button>
                   )}
-                  <button
-                    onClick={() => {
-                      if (step < totalSteps) setStep(step + 1); else {
-                        // router.push("/chat"); 
-                        submit
-                        // console.log(form);
+                  {isloading ? (
+                    <button
+                      onClick={() => {
+                        if (step < totalSteps) setStep(step + 1); else {
+                          // router.push("/chat"); 
+                          submit()
+                          // console.log(form);
 
-                      }
-                    }}
-                    className="flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20"
-                  >
-                    {step === totalSteps ? "Enter the chat →" : "Continue"}
-                  </button>
+                        }
+                      }}
+                      disabled
+                      className=" flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20"
+                    >
+                      {step === totalSteps ? "Loading..." : "Continue"}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={
+                        () => {
+                          if (step < totalSteps) setStep(step + 1); else {
+                            // router.push("/chat"); 
+                            submit()
+                            // console.log(form);
+
+                          }
+                        }}
+                      className="flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20"
+                    >
+                      {step === totalSteps ? "Enter the chat →" : "Continue"}
+                    </button>)}
+
                 </div>
               </div>
 
@@ -306,7 +357,7 @@ export default function Onboarding() {
             </div>
           </div>
         </div>
-      </div>
+      </div >
 
     </>
 
