@@ -76,6 +76,20 @@ export default function Onboarding() {
 
   };
 
+  const compressImage = (file) => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const img = new Image();
+      img.src = URL.createObjectURL(file);
+      img.onload = () => {
+        canvas.width = 400;
+        canvas.height = 400;
+        canvas.getContext('2d').drawImage(img, 0, 0, 400, 400);
+        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.7);
+      };
+    });
+  };
+
   const onDrop = (e) => {
     e.preventDefault();
     setDragging(false);
@@ -92,8 +106,9 @@ export default function Onboarding() {
 
       // Upload to Cloudinary via API route
       const formData = new FormData();
-      formData.append('image', avatar);
-
+      // ✅ Fix — compress first then send
+      const compressed = await compressImage(avatar);
+      formData.append('image', compressed, 'avatar.jpg');
       const res = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
@@ -107,7 +122,7 @@ export default function Onboarding() {
       console.log(form);
 
     } catch (error) {
-      console.error('Upload failed:', err);
+      console.error('Upload failed:', error);
     }
     finally {
       setIsloading(false);  // stop loading whether success or fail
@@ -340,8 +355,8 @@ export default function Onboarding() {
                         () => {
                           if (step < totalSteps) setStep(step + 1); else {
                             // router.push("/chat"); 
+                            console.log(form);
                             submit()
-                            // console.log(form);
 
                           }
                         }}

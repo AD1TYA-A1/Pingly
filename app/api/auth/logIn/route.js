@@ -8,7 +8,7 @@ export async function POST(req) {
 
     const credentials = await db.collection("users").findOne({ userName: body.userName, password: body.password })
 
-    console.log(credentials);
+    // console.log(credentials);
 
     if (credentials) {
         return NextResponse.json({ success: true, message: "Log In Success" })
