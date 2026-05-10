@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 const STATUSES = [
   { label: "Available", color: "#22c55e" },
@@ -119,15 +120,37 @@ export default function Onboarding() {
 
       setForm(prev => ({ ...prev, avatarUrl: data.url })); // save cloud URL
 
-      console.log(form);
-
     } catch (error) {
       console.error('Upload failed:', error);
     }
     finally {
       setIsloading(false);  // stop loading whether success or fail
     }
+    try {
+      
+      let data = JSON.stringify({ form })
 
+      let config = {
+        method: 'post',
+        maxBodyLength: Infinity,
+        url: '/api/users/profile',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        data: data
+      };
+
+      axios.request(config)
+        .then((response) => {
+          console.log(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+
+    } catch (error) {
+      console.log(error);
+    }
 
   }
 

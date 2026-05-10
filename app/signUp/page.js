@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from 'react-toastify';
+import axios from "axios";
 
 export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
@@ -116,7 +117,61 @@ export default function SignUp() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: newBody,
+    }).then(async (response) => {
+      const result = await response.json();
+
+      if (response.ok) {
+        // ✅ Success
+        toast.success(result.message || "Account created successfully! 🎉", {
+          position: "top-right",
+          autoClose: 3000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "dark",
+        });
+        // redirect after toast
+        setTimeout(() => router.push("/logIn"), 3000);
+
+      } else {
+        // ❌ Server returned error
+        toast.error(result.error || "Something went wrong 😬", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          theme: "dark",
+        });
+      }
     })
+      .catch((error) => {
+        // ❌ Network error
+        toast.error("Network error. Try again 😵", {
+          position: "top-right",
+          autoClose: 5000,
+          theme: "dark",
+        });
+        console.error(error);
+      });
+
+
+    return toast("Redirectinggg!!! 🍃", {
+      position: "top-right",
+      autoClose: 5000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      // transition: Bounce,
+    });
+
+    router.push("/chat")
+
   };
 
 
@@ -322,7 +377,7 @@ export default function SignUp() {
             {/* Submit */}
             <button className="
             w-full mt-7 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black font-semibold py-3 rounded-xl text-sm tracking-wide transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20 " onClick={submit}>
-              Create account In
+              Create account
             </button>
 
             {/* Divider */}

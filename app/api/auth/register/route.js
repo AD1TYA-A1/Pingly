@@ -25,6 +25,7 @@ export async function POST(req) {
         console.log(doEmailExists);
 
         if (doEmailExists) {
+            
             return NextResponse.json({ success: false, message: "Email Already Exists" }, { status: 409 })
             // 409 → Conflict (e.g. username already exists ✅ better than 400 in your case)
         }
