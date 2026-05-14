@@ -19,6 +19,7 @@ const EMOJIS = ["🔥", "⚡", "💀", "🚀", "👑", "🎯", "💎", "🌙", "
 
 
 export default function Onboarding() {
+  let avatarURL = ""
   const [step, setStep] = useState(1);
   const [preview, setPreview] = useState(null);
   const [dragging, setDragging] = useState(false);
@@ -117,8 +118,11 @@ export default function Onboarding() {
 
       const data = await res.json();
       console.log(data);
+      console.log(data.url);
+      avatarURL = data.url;
+      setForm(prev => ({ ...prev, avatarURL })); // save cloud URL
 
-      setForm(prev => ({ ...prev, avatarUrl: data.url })); // save cloud URL
+
 
     } catch (error) {
       console.error('Upload failed:', error);
@@ -126,10 +130,13 @@ export default function Onboarding() {
     finally {
       setIsloading(false);  // stop loading whether success or fail
     }
-    try {
-      
-      let data = JSON.stringify({ form })
 
+    try {
+
+      let data = JSON.stringify({
+        ...form,
+        avatarUrl: avatarURL  // ← add it here explicitly
+      })
       let config = {
         method: 'post',
         maxBodyLength: Infinity,
@@ -148,10 +155,10 @@ export default function Onboarding() {
           console.log(error);
         });
 
+      router.push("/chat")
     } catch (error) {
       console.log(error);
     }
-
   }
 
   return (
