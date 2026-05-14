@@ -3,8 +3,10 @@ import axios from 'axios'
 import React from 'react'
 import { error } from 'three'
 import { useState, useEffect, useRef } from 'react'
+import { useRouter } from 'next/navigation'
 
 const page = () => {
+  const router = useRouter()
   const [user, setUser] = useState({})
   const [selectedUser, setSelectedUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -14,7 +16,7 @@ const page = () => {
       .then((res) => {
         // console.log(res);
         // console.log(res.data.avatarUrl);
-        console.log(res.data);
+        // console.log(res.data);
         setUser(res.data)
       })
       .catch((err) => {
@@ -163,12 +165,15 @@ const page = () => {
               <span className="text-white font-semibold text-sm tracking-tight">Admin-Chats</span>
             </div>
             {/* You / profile pill */}
-            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-full px-8.5 py-1 cursor-pointer">
+            <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-full px-8.5 py-1 cursor-pointer" onClick={() => {
+              router.push("/profile")
+            }}>
               <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
-              <img src={user.avatarUrl} alt="profile" className=' w-full h-full rounded-4xl' />
+                <img src={user.avatarUrl} alt="profile" className=' w-full h-full rounded-4xl' />
               </div>
               <span className="text-white/50 text-[11px] font-medium">{user.userName}</span>
             </div>
+
           </div>
 
           {/* Search */}
