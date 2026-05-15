@@ -6,7 +6,9 @@ import jwt, { decode } from 'jsonwebtoken';
 export async function POST(req) {
     const cookieStore = await cookies();
     const body = await req.json();
+    console.log(body);
     const form = body;
+    
     console.log("YOUR FORM");
 
     console.log(form);
