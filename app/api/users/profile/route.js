@@ -32,6 +32,7 @@ export async function POST(req) {
                 status: form.status,
                 tagline: form.tagline,
                 emoji: form.emoji,
+                particcipants: [],
                 updatedAt: new Date()
             }
         }

@@ -84,7 +84,7 @@ export default function SignUp() {
             theme: "dark",
             // transition: Bounce,
           });
-          router.push("/onBoarding")
+          router.push("/chat")
         } else {
           toast.error('Invalid Credentials ❌', {
             position: "top-right",

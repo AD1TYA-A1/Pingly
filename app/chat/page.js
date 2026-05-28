@@ -1,7 +1,7 @@
 "use client"
 import axios from 'axios'
 import React from 'react'
-import { error } from 'three'
+// import { error } from 'three'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
@@ -10,6 +10,8 @@ const page = () => {
   const [user, setUser] = useState({})
   const [selectedUser, setSelectedUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  
+
 
   useEffect(() => {
     axios.get('/api/auth/me')
@@ -24,12 +26,12 @@ const page = () => {
       })
   }, [])
 
-  const MOCK_USERS = [
-    { id: "usr_001", name: "Person 1", emoji: "🔥", color: "#f59e0b", status: "Available", statusColor: "#22c55e", lastMsg: "Hey, what's up?", time: "2m" },
-    { id: "usr_002", name: "Person 2", emoji: "⚡", color: "#3b82f6", status: "Busy", statusColor: "#ef4444", lastMsg: "Did you see that?", time: "15m" },
-    { id: "usr_003", name: "Person 3", emoji: "👑", color: "#8b5cf6", status: "In the zone", statusColor: "#f59e0b", lastMsg: "Let's go 🚀", time: "1h" },
-    { id: "usr_004", name: "Person 4", emoji: "💎", color: "#06b6d4", status: "Away", statusColor: "#6b7280", lastMsg: "brb", time: "3h" },
-  ];
+  // const MOCK_USERS = [
+  //   { id: "usr_001", name: "Person 1", emoji: "🔥", color: "#f59e0b", status: "Available", statusColor: "#22c55e", lastMsg: "Hey, what's up?", time: "2m" },
+  //   { id: "usr_002", name: "Person 2", emoji: "⚡", color: "#3b82f6", status: "Busy", statusColor: "#ef4444", lastMsg: "Did you see that?", time: "15m" },
+  //   { id: "usr_003", name: "Person 3", emoji: "👑", color: "#8b5cf6", status: "In the zone", statusColor: "#f59e0b", lastMsg: "Let's go 🚀", time: "1h" },
+  //   { id: "usr_004", name: "Person 4", emoji: "💎", color: "#06b6d4", status: "Away", statusColor: "#6b7280", lastMsg: "brb", time: "3h" },
+  // ];
 
   // Animated SVG canvas for empty state
   function EmptyStateCanvas() {
@@ -197,42 +199,7 @@ const page = () => {
 
           {/* User list */}
           <div className="flex-1 overflow-y-auto px-3 pb-4 flex flex-col gap-1">
-            {MOCK_USERS.map((user, i) => (
-              <button
-                key={user.id}
-                onClick={() => { setSelectedUser(user); setSidebarOpen(false); }}
-                className={`w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-150 cursor-pointer group
-                ${selectedUser?.id === user.id
-                    ? "bg-amber-400/10 border border-amber-400/20"
-                    : "hover:bg-white/[0.04] border border-transparent"
-                  }`}
-              >
-                {/* Avatar */}
-                <div className="relative flex-shrink-0">
-                  <div
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-lg"
-                    style={{ background: user.color + "22", border: `1.5px solid ${user.color}44` }}
-                  >
-                    {user.emoji}
-                  </div>
-                  <div
-                    className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0d0d0d]"
-                    style={{ background: user.statusColor }}
-                  />
-                </div>
-
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className={`text-sm font-medium truncate ${selectedUser?.id === user.id ? "text-amber-400" : "text-white/80"}`}>
-                      {user.name}
-                    </p>
-                    <span className="text-white/25 text-[10px] flex-shrink-0 ml-1">{user.time}</span>
-                  </div>
-                  <p className="text-white/30 text-xs truncate mt-0.5">{user.lastMsg}</p>
-                </div>
-              </button>
-            ))}
+            
           </div>
 
           {/* Bottom settings */}
