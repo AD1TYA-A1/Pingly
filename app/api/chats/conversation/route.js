@@ -3,15 +3,16 @@ import clientPromise from "@/app/lib/mongodb";
 import { cookies } from "next/headers";
 import jwt, { decode } from 'jsonwebtoken';
 
-export async function POST(req) {
+export async function GET() {
     try {
+        const cookieStore = await cookies(); 
 
-        const body = await req.json();
         const client = await clientPromise
         const db = await client.db("adminChat")
 
         const token = cookieStore.get('token')?.value;
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
+        console.log(decoded);
 
 
         // FINDING ALL F USERS CHAT IF PRESENT

@@ -5,12 +5,14 @@ import React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 
+
 const page = () => {
   const router = useRouter()
   const [user, setUser] = useState({})
   const [selectedUser, setSelectedUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+  const [myChatters, setMyChatters] = useState([])
+
 
 
   useEffect(() => {
@@ -24,6 +26,18 @@ const page = () => {
       .catch((err) => {
         console.error(err);
       })
+
+    // Fetch conversations — no body needed, auth via cookie/token
+    axios.get('/api/chats/conversation')
+      .then((response) => {
+        console.log(response.data);
+        setMyChatters(response.data.conversations);
+        // console.log(response.data.conversations.length);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+
   }, [])
 
   // const MOCK_USERS = [
@@ -197,9 +211,37 @@ const page = () => {
             <span className="text-white/25 text-[10px] uppercase tracking-widest font-medium">Conversations</span>
           </div>
 
+
           {/* User list */}
           <div className="flex-1 overflow-y-auto px-3 pb-4 flex flex-col gap-1">
-            
+            {myChatters.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full py-10 gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-400/10 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                    fill="none" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                </div>
+                <p className="text-white/70 text-sm font-medium">No conversations yet</p>
+                <p className="text-white/30 text-xs text-center leading-relaxed">
+                  Start a chat to see your<br />conversations here
+                </p>
+                {/* ✅ New button */}
+                <button
+                  onClick={() => router.push('/explore')} // change route as needed
+                  className="mt-2 px-4 py-2 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 
+                text-amber-400 text-xs font-semibold border border-amber-400/20 
+                hover:border-amber-400/40 transition-all duration-200 cursor-pointer"
+                >
+                  Start Exploring →
+                </button>
+
+              </div>
+            ) : (
+              myChatters.map((chatter) => (
+                <div key={chatter.id}>{/* chatter item */}</div>
+              ))
+            )}
           </div>
 
           {/* Bottom settings */}
