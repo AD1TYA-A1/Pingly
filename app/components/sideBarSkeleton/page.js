@@ -117,7 +117,9 @@ function SidebarSkeleton() {
 export default function UsersLoadingSkeleton() {
     return (
         <>
-            <style>{shimmer}</style>
+            <style>{shimmer}
+                
+            </style>
             <div
                 style={{
                     display: "flex",
