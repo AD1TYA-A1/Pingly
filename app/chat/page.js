@@ -4,10 +4,11 @@ import React from 'react'
 // import { error } from 'three'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-
+import UsersLoadingSkeleton from '../components/sideBarSkeleton/page'
 
 const page = () => {
   // const chatters = [];
+  const [chattersLoading, setChattersLoading] = useState(true)
 
 
   const router = useRouter()
@@ -94,6 +95,8 @@ const page = () => {
                 // 4. Update your React state safely with the finished data!
                 setMyChatters(completedChatters);
               })
+
+            setChattersLoading(false)
 
 
             // console.log(chatters);
@@ -313,78 +316,80 @@ const page = () => {
 
           {/* User list */}
           <div className="flex-1 overflow-y-auto px-3 pb-4 flex flex-col gap-1">
-            {myChatters.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full py-10 gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-400/10 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
-                    fill="none" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                  </svg>
-                </div>
-                <p className="text-white/70 text-sm font-medium">No conversations yet</p>
-                <p className="text-white/30 text-xs text-center leading-relaxed">
-                  Start a chat to see your<br />conversations here
-                </p>
-                {/* ✅ New button */}
-                <button
-                  onClick={() => router.push('/explore')} // change route as needed
-                  className="mt-2 px-4 py-2 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 
+            {chattersLoading ? (
+              <UsersLoadingSkeleton />
+            ) : (
+              myChatters.length === 0 ? (
+                <div className="flex flex-col items-center justify-center h-full py-10 gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-amber-400/10 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24"
+                      fill="none" stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                  </div>
+                  <p className="text-white/70 text-sm font-medium">No conversations yet</p>
+                  <p className="text-white/30 text-xs text-center leading-relaxed">
+                    Start a chat to see your<br />conversations here
+                  </p>
+                  {/* ✅ New button */}
+                  <button
+                    onClick={() => router.push('/explore')} // change route as needed
+                    className="mt-2 px-4 py-2 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 
                 text-amber-400 text-xs font-semibold border border-amber-400/20 
                 hover:border-amber-400/40 transition-all duration-200 cursor-pointer"
-                >
-                  Start Exploring →
-                </button>
+                  >
+                    Start Exploring →
+                  </button>
 
-              </div>
-            ) : (
-              <div className="flex flex-col gap-2 px-2">
-                {myChatters.map((chatterArr, index) => {
-                  const chatter = chatterArr[0]; // Each item is an array with one participant
-                  if (!chatter) return null;
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2 px-2">
+                  {myChatters.map((chatterArr, index) => {
+                    const chatter = chatterArr[0]; // Each item is an array with one participant
+                    if (!chatter) return null;
 
-                  return (
-                    <div
-                      key={chatter._id || index}
-                      className={`flex items-center gap-3 px-4 py-3  cursor-pointer rounded-full border transition-all duration-200 group
-    ${userToChatWith === chatter._id
-                          ? "bg-yellow-400/20 border-yellow-400/40"
-                          : "bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/40"
-                        }`}
-                      onClick={() => {
-                        console.log("Selected:", chatter._id)
-                        router.push(`/chat/${chatter._id}`)
-                      }}
-                    >
-                      {/* Avatar */}
+                    return (
                       <div
-                        className="w-9 h-9 rounded-full border-2 border-zinc-600 group-hover:border-yellow-500 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden transition-colors"
-                        style={{ backgroundColor: chatter.avatarColor || "#3b3b3b" }}
+                        key={chatter._id || index}
+                        className={`flex items-center gap-3 px-4 py-3  cursor-pointer rounded-full border transition-all duration-200 group
+bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/40                          }`}
+                        onClick={() => {
+                          console.log("Selected:", chatter._id)
+                          router.push(`/chat/${chatter._id}`)
+                        }}
                       >
-                        {chatter.avatarUrl ? (
-                          <img
-                            src={chatter.avatarUrl}
-                            alt={chatter.userName}
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          chatter.userName?.[0]?.toUpperCase() || "?"
-                        )}
-                      </div>
+                        {/* Avatar */}
+                        <div
+                          className="w-9 h-9 rounded-full border-2 border-zinc-600 group-hover:border-yellow-500 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden transition-colors"
+                          style={{ backgroundColor: chatter.avatarColor || "#3b3b3b" }}
+                        >
+                          {chatter.avatarUrl ? (
+                            <img
+                              src={chatter.avatarUrl}
+                              alt={chatter.userName}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            chatter.userName?.[0]?.toUpperCase() || "?"
+                          )}
+                        </div>
 
-                      {/* Name & Email */}
-                      <div className="flex flex-col min-w-0 flex-1">
-                        <span className="text-sm font-semibold text-zinc-200 group-hover:text-white truncate">
-                          {chatter.userName || "Unknown"}
-                        </span>
-                        <span className="text-xs text-zinc-500 truncate">
-                          {chatter.email || ""}
-                        </span>
+                        {/* Name & Email */}
+                        <div className="flex flex-col min-w-0 flex-1">
+                          <span className="text-sm font-semibold text-zinc-200 group-hover:text-white truncate">
+                            {chatter.userName || "Unknown"}
+                          </span>
+                          <span className="text-xs text-zinc-500 truncate">
+                            {chatter.email || ""}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )
             )}
+
 
           </div>
 
