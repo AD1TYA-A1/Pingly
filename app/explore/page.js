@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 // ─── Safe status helper ───────────────────────────────────────────────────────
 // Some users in your DB may not have a status object yet — this prevents crashes
@@ -467,6 +468,7 @@ function SkeletonCard({ index }) {
 
 // ─── Main Page ────────────────────────────────────────────────────────────────
 export default function ExplorePage() {
+  const router = useRouter()
   const [myUsers, setMyUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -504,7 +506,9 @@ export default function ExplorePage() {
 
   const handleChat = (user) => {
     // TODO: replace with your router — e.g. router.push(`/chat/${user._id}`)
-    console.log("Open chat with:", user._id);
+    router.push(`/chat/${user._id}`)
+    // console.log("Open chat with:", user._id);
+
   };
 
   return (
@@ -661,7 +665,7 @@ export default function ExplorePage() {
               )}
             </div>
 
-           
+
           </div>
 
           {/* ── Results count ── */}

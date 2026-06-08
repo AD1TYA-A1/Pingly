@@ -1,5 +1,4 @@
 import clientPromise from "@/app/lib/mongodb";
-import Email from "next-auth/providers/email";
 import { NextResponse } from "next/server";
 
 export async function POST(req) {

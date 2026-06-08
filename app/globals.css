@@ -1,5 +1,21 @@
 @import "tailwindcss";
+/* Hide default scrollbar but keep functionality */
+.messages-container::-webkit-scrollbar {
+  width: 4px;
+}
 
+.messages-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+}
+
+.messages-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 body,
 html,
 #app {
@@ -12,7 +28,6 @@ html,
     rgba(0, 0, 0, 0.5) 200%
   );
 }
-
 
 #app {
   height: 100%;

@@ -31,8 +31,8 @@ export async function POST(req) {
                 avatarColor: form.avatarColor,
                 status: form.status,
                 tagline: form.tagline,
+                displayName:form.displayName,
                 emoji: form.emoji,
-                particcipants: [],
                 updatedAt: new Date()
             }
         }

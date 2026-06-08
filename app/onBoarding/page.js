@@ -369,7 +369,7 @@ export default function Onboarding() {
                       onClick={() => {
                         if (step < totalSteps) setStep(step + 1); else {
                           // router.push("/chat"); 
-                          submit()
+                          // submit()
                           // console.log(form);
 
                         }

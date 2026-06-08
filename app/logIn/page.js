@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { ToastContainer, toast } from 'react-toastify';
+import axios from "axios";
 
 
 export default function SignUp() {
@@ -10,9 +11,10 @@ export default function SignUp() {
   const [form, setForm] = useState({ userName: "", password: "" });
   const canvasRef = useRef(null);
   const router = useRouter();
+  const [loggingIn, setLoggingIn] = useState(false)
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
-
+  //Contains BG effect 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -48,11 +50,13 @@ export default function SignUp() {
     return () => { cancelAnimationFrame(animId); window.removeEventListener("resize", onResize); };
   }, []);
 
-  const logIn = () => {
+  const logIn = (e) => {
+    e.target.disabled = true
+
+    setLoggingIn(true)
     // console.log(form.userName);
     // console.log(form.password);
 
-    const axios = require('axios');
     let data = JSON.stringify({
       "userName": form.userName.trim(),
       "password": form.password.trim()
@@ -102,7 +106,7 @@ export default function SignUp() {
       .catch((error) => {
         console.log(error);
       });
-
+    setLoggingIn(false)
   }
 
   return (
@@ -193,10 +197,11 @@ export default function SignUp() {
               </div>
 
             </div>
-
             {/* Submit */}
-            <button className="w-full mt-6 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black font-semibold py-2.5 rounded-xl text-sm tracking-wide transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20" onClick={logIn}>
-              Log In
+            <button className="w-full mt-6 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black font-semibold py-2.5 rounded-xl text-sm tracking-wide transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20" onClick={
+              logIn
+            }>
+              {loggingIn ? "Loading..." : "LogIn"}
             </button>
 
             <div className="flex items-center gap-3 my-4">

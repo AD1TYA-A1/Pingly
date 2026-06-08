@@ -14,7 +14,7 @@ export async function GET() {
 
         const users = await db.collection("users").find({
             email:{$ne:decoded.email}
-        }).toArray() // except that document where email is decpded.email   
+        }, { projection: { password: 0 }} ).toArray() // except that document where email is decpded.email   
         return NextResponse.json({ sucess: true, users }, { status: 200 })
     } catch (error) {
         return NextResponse.json({ sucess: false, error }, { status: 500 })

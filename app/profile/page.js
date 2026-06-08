@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
+import { log } from "three/src/nodes/TSL.js";
 
 const MOCK_USER = {
   _id: "69d9ae99809ad9c6825c1c33",
@@ -42,6 +43,7 @@ function Avatar({ user, size = "lg", preview }) {
 }
 
 export default function Profile() {
+  const avatarChanged = useRef(false)
   const router = useRouter()
   let avatarUrl = ""
   const [user, setUser] = useState(null);
@@ -61,6 +63,8 @@ export default function Profile() {
         // console.log(res.data);
         setUser(res.data)
         setForm(res.data)
+        console.log(res.data);
+
       })
       .catch((err) => {
         console.error(err);
@@ -74,6 +78,9 @@ export default function Profile() {
     setAvatarPreview(URL.createObjectURL(file));
   };
   const compressImage = (file) => {
+    if (!file) {
+      return -1
+    }
     return new Promise((resolve) => {
       const canvas = document.createElement('canvas');
       const img = new Image();
@@ -91,27 +98,31 @@ export default function Profile() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      // Upload to Cloudinary via API route
-      const formData = new FormData();
-      // ✅ Fix — compress first then send
-      const compressed = await compressImage(avatarFile);
-      formData.append('image', compressed, 'avatar.jpg');
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
+      let finalAvatarURL = form.avatarUrl
+      if (avatarFile) {
+        // Upload to Cloudinary via API route
+        const formData = new FormData();
+        // ✅ Fix — compress first then send
+        const compressed = await compressImage(avatarFile);
+        formData.append('image', compressed, 'avatar.jpg');
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
+        const data = await res.json();
+        // console.log(data);
+        // console.log(data.url);
 
-      const data = await res.json();
-      // console.log(data);
-      // console.log(data.url);
-      avatarUrl = data.url;
-      setForm(prev => ({ ...prev, avatarUrl })); // save cloud URL
+        finalAvatarURL = data.url;
+        setForm(prev => ({ ...prev, finalAvatarURL })); // save cloud URL
+        // console.log(form);
+      }
 
-      // console.log(form);
-      
+
+
       let dataToSend = JSON.stringify({
         ...form,
-        avatarUrl: avatarUrl  // ← add it here explicitly
+        avatarUrl: finalAvatarURL  // ← add it here explicitly
       })
       // console.log(form);
       let config = {
@@ -129,15 +140,15 @@ export default function Profile() {
           // console.log(response.data);
         })
         .catch((error) => {
-          // console.log(error);
+          console.log(error);
         });
 
 
 
     } finally {
-      router.refresh()
       setSaving(false);
     }
+    location.reload()
   };
 
   if (!user) return (
@@ -164,7 +175,9 @@ export default function Profile() {
 
         {/* ── Navbar ── */}
         <nav className="sticky top-0 z-30 flex items-center justify-between px-6 py-3.5 bg-[#060608]/95 backdrop-blur-md border-b border-white/[0.05]">
-          <div className="flex items-center gap-2.5">
+          <div onClick={() => {
+            router.push("/logIn")
+          }} className=" cursor-pointer flex items-center gap-2.5">
             <div className="w-7 h-7 rounded-lg bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-400/30">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -172,14 +185,47 @@ export default function Profile() {
             </div>
             <span className="text-white font-semibold text-sm tracking-tight">Admin-Chats</span>
           </div>
-          <button onClick={() => setEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-black text-xs font-bold transition-all cursor-pointer shadow-lg shadow-amber-400/20">
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-            </svg>
-            Edit profile
-          </button>
+          <div className="z-30 flex items-center justify-between px-6 py-3.5 bg-[#060608]/95 backdrop-blur-md border-b border-white/[0.05] gap-10">
+
+            <button onClick={() => setEditing(true)}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-black text-xs font-bold transition-all cursor-pointer shadow-lg shadow-amber-400/20">
+              <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+              Edit profile
+            </button>
+            <button onClick={async () => {
+
+              await fetch("/api/auth/logOut", {
+                method: "POST",
+                credentials: "include"
+              });
+
+              router.push("/logIn");
+            }}
+              className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-black text-xs font-bold transition-all cursor-pointer shadow-lg shadow-amber-400/20">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="11"
+                height="11"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                {/* Door */}
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+
+                {/* Arrow */}
+                <path d="M16 17l5-5-5-5" />
+                <path d="M21 12H9" />
+              </svg>              Log Out
+            </button>
+          </div>
+
         </nav>
 
         {/* ── Profile body ── */}
@@ -221,7 +267,7 @@ export default function Profile() {
           <div className="px-1 mb-4">
             <div className="flex items-center gap-3 flex-wrap mb-1">
               <h1 className="text-white font-black text-4xl sm:text-5xl uppercase tracking-tight leading-none">
-                {user.userName}
+                {user.displayName}
               </h1>
               <span className="text-3xl">{user.emoji}</span>
               <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
@@ -343,14 +389,14 @@ export default function Profile() {
                     </div>
                   </div>
 
-                  {/* Display name
+                  {/* Display name */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-white/40 text-[10px] uppercase tracking-widest font-semibold">Display Name</label>
                     <input type="text"
                       value={form.displayName || ""}
                       onChange={e => setForm({ ...form, displayName: e.target.value })}
                       className="bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 outline-none focus:border-amber-400/50 transition-colors" />
-                  </div> */}
+                  </div>
 
                   {/* Tagline */}
                   <div className="flex flex-col gap-1.5">

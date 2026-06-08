@@ -14,7 +14,7 @@ export async function POST(req) {
     const email = body.email;
     const userName = body.userName;
 
-    
+
     // console.log(body.userName);
 
 
@@ -25,7 +25,7 @@ export async function POST(req) {
         console.log(doEmailExists);
 
         if (doEmailExists) {
-            
+
             return NextResponse.json({ success: false, message: "Email Already Exists" }, { status: 409 })
             // 409 → Conflict (e.g. username already exists ✅ better than 400 in your case)
         }
@@ -40,13 +40,13 @@ export async function POST(req) {
 
         // Adding the User
         const addUser = await db.collection("users").insertOne({
-            email:body.email,
-            userName:body.userName,
+            email: body.email,
+            userName: body.userName,
             password: body.password
         })
 
         if (addUser) {
-            return NextResponse.json({ success: true, message: "User Registered Successfully" }, { status: 201 })
+            return NextResponse.json({ success: true, message: "User Registered successfully! 🎉" }, { status: 201 })
             // The HTTP status code 201 created is a  SUCCESS REQUEST indicating that a request was fulfilled and resulted in the creation of one or more new resources
         }
         return NextResponse.json({ success: false, message: "Cannot Register User" }, { status: 200 })

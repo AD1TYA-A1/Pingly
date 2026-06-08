@@ -11,7 +11,7 @@ export async function POST(req) {
 
     const credentials = await db.collection("users").findOne({ userName: body.userName, password: body.password })
 
-    console.log(credentials);
+    // console.log(credentials);
 
     if (credentials) {
         // ✅ Create JWT token

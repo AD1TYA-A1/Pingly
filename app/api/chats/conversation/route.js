@@ -3,6 +3,7 @@ import clientPromise from "@/app/lib/mongodb";
 import { cookies } from "next/headers";
 import jwt, { decode } from 'jsonwebtoken';
 
+// USED IN CHAT ENDPOINT TO SEE IF I HAVE CHATTED WITH ANYONE OR NOT
 export async function GET() {
     try {
         const cookieStore = await cookies(); 
@@ -17,7 +18,7 @@ export async function GET() {
 
         // FINDING ALL F USERS CHAT IF PRESENT
         const conversations = await db.collection("conversations").find({
-            participants: decoded.email
+            participants: decoded.userId
         }).toArray()
         //.find() does NOT directly return the actual data.
         // It returns a:
@@ -48,6 +49,8 @@ export async function GET() {
                 success: true,
                 conversations
             })
+
+            
         }
     } catch (error) {
         return NextResponse.json({

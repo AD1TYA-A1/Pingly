@@ -15,6 +15,6 @@ export async function GET() {
 
     const user = await db.collection("users").findOne({ email: decoded.email },
         { projection: { password: 0 } })  // ← this excludes password in native MongoDB
-    console.log("user is ", user)
+    // console.log("user is ", user)
     return NextResponse.json(user)
 }

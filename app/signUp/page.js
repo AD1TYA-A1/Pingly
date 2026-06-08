@@ -54,9 +54,10 @@ export default function SignUp() {
 
 
   const submit = async () => {
-    const { otp, ...rest } = form;
+
+    const { otp, ...rest } = form;  // Removes OTP 
     const newBody = JSON.stringify(rest); // everything except otp
-    console.log(newBody);
+    // console.log(newBody);
     if (!form.userName && !form.email && !form.password) {
       return toast("Don’t leave blanks 👀", {
         position: "top-right",
@@ -98,6 +99,19 @@ export default function SignUp() {
         // transition: Bounce,
       });
     }
+    if (!form.email.includes("@")) {
+      return toast("Invalid Email KID 😕", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        // transition: Bounce,
+      });
+    }
 
     if (!form.password) {
       return toast("No password? Risky move 😬", {
@@ -112,50 +126,94 @@ export default function SignUp() {
         // transition: Bounce,
       });
     }
-
-    await fetch("/api/auth/register", {
+    if (!form.otp) {
+      return toast("Enter the OTP first 😬", {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: false,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "dark",
+        // transition: Bounce,
+      });
+    }
+    let otpPayload = {
+      email: form.email,
+      otp: form.otp
+    }
+    // Checking OTP FIRST 
+    await fetch("/api/verifyOtp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: newBody,
+      body: otpPayload,
     }).then(async (response) => {
       const result = await response.json();
+      console.log(result);
+      if (result.verification === "success") {
+        await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: newBody,
+        }).then(async (response) => {
+          const result = await response.json();
 
-      if (response.ok) {
-        // ✅ Success
-        toast.success(result.message || "Account created successfully! 🎉", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "dark",
-        });
-        // redirect after toast
-        setTimeout(() => router.push("/logIn"), 3000);
+          if (response.success) {
+            // ✅ Success
+            toast.success(result.message || "Account created successfully! 🎉", {
+              position: "top-right",
+              autoClose: 3000,
+              hideProgressBar: false,
+              closeOnClick: false,
+              pauseOnHover: true,
+              draggable: true,
+              theme: "dark",
+            });
+            // redirect after toast
+            setTimeout(() => router.push("/onBoarding"), 1000);
 
-      } else {
-        // ❌ Server returned error
-        toast.error(result.error || "Something went wrong 😬", {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          theme: "dark",
-        });
+          } else {
+            // ❌ Server returned error
+            toast.error(result.message || "Something went wrong 😬", {
+              position: "top-right",
+              autoClose: 5000,
+              hideProgressBar: false,
+              closeOnClick: false,
+              pauseOnHover: true,
+              draggable: true,
+              theme: "dark",
+            });
+          }
+        })
+          .catch((error) => {
+            // ❌ Network error
+            toast.error("Network error. Try again 😵", {
+              position: "top-right",
+              autoClose: 5000,
+              theme: "dark",
+            });
+            console.error(error);
+          });
+
       }
-    })
-      .catch((error) => {
-        // ❌ Network error
-        toast.error("Network error. Try again 😵", {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "dark",
-        });
-        console.error(error);
+      return toast.error("Invalid OTP 😵", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "dark",
       });
+
+    }).catch((error) => {
+      // ❌ Network error
+      toast.error("Network error. Try again 😵", {
+        position: "top-right",
+        autoClose: 5000,
+        theme: "dark",
+      });
+      console.error(error);
+    });
+
+
 
 
     return toast("Redirectinggg!!! 🍃", {

@@ -7,6 +7,9 @@ import { useRouter } from 'next/navigation'
 
 
 const page = () => {
+  // const chatters = [];
+
+
   const router = useRouter()
   const [user, setUser] = useState({})
   const [selectedUser, setSelectedUser] = useState(null);
@@ -22,21 +25,115 @@ const page = () => {
         // console.log(res.data.avatarUrl);
         // console.log(res.data);
         setUser(res.data)
-      })
-      .catch((err) => {
-        console.error(err);
-      })
+        // Fetch conversations — no body needed, auth via cookie/token
+        axios.get('/api/chats/conversation')
+          .then((response) => {
+            // console.log(response.data);
+            // setMyChatters(response.data.conversations);
+            // console.log(response.data.conversations);
+            const chattersID = [];
 
-    // Fetch conversations — no body needed, auth via cookie/token
-    axios.get('/api/chats/conversation')
-      .then((response) => {
-        console.log(response.data);
-        setMyChatters(response.data.conversations);
+            response.data.conversations.forEach(e => {
+              e.participants.forEach(participant => {
+                // console.log("participant: ", participant);
+                // console.log(user);
+                // console.log("UserID: ", user._id);
+
+                if (participant != res.data._id) {
+                  // console.log("participant != user._id");
+
+                  if (!chattersID.includes(participant)) {
+                    chattersID.push(participant)
+                  }
+                }
+              })
+              // CHATTERS ARRAY CONTAINS ID OF MY CHATTERS (PEOPLE I CHATTED WITH)
+              // console.log(chattersID);
+
+
+              // console.log(chatters);
+
+
+
+
+              // setMyChatters(chattersID)
+
+
+
+
+            })
+            // 2. Map those IDs into an array of pending Axios requests
+            const apiRequests = chattersID.map(id => {
+              let data = JSON.stringify({ "id": id });
+
+              let config = {
+                method: 'post',
+                maxBodyLength: Infinity,
+                url: '/api/users/getUser',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                data: data
+              };
+
+              // CRITICAL: Return the Axios promise directly. 
+              // Do NOT use .then() inside the map.
+              return axios.request(config);
+            });
+            // 3. Hand the array of requests to Promise.all
+            Promise.all(apiRequests)
+              .then((results) => {
+                // 'results' is an array containing the Axios response objects 
+                // matched perfectly to the order of your chattersID array.
+
+                const completedChatters = results.map(res => res.data.user);
+
+                console.log("Successfully fetched all users:", completedChatters);
+                // console.log("Actual verified length:", completedChatters.length);
+
+                // 4. Update your React state safely with the finished data!
+                setMyChatters(completedChatters);
+              })
+
+
+            // console.log(chatters);
+
+
+            // setMyChatters(chatters)
+
+
+          })
+          .catch((err) => {
+            console.error(err);
+          })
+
+
+
+        // response.data.conversations.forEach(e => {
+        //   e.participants.forEach(e => {
+        //     if (e != user._id) {
+        //       console.log(e);
+
+        //       setMyChatters(prev =>[...prev, e])
+        //     }
+        //   });
+        // });
+
+        // console.log(myChatters);
+        // console.log(myChatters);
+        // console.log(myChatters);
+
+
+
+
+
+
         // console.log(response.data.conversations.length);
       })
       .catch((error) => {
         console.error(error);
       });
+
 
   }, [])
 
@@ -172,7 +269,9 @@ const page = () => {
 
           {/* Navbar / Header */}
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/[0.06]">
-            <div className="flex items-center gap-2.5">
+            <div onClick={() => {
+              router.push("/logIn")
+            }} className=" cursor-pointer flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-lg bg-amber-400 flex items-center justify-center">
                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
@@ -238,23 +337,86 @@ const page = () => {
 
               </div>
             ) : (
-              myChatters.map((chatter) => (
-                <div key={chatter.id}>{/* chatter item */}</div>
-              ))
+              <div className="flex flex-col gap-2 px-2">
+                {myChatters.map((chatterArr, index) => {
+                  const chatter = chatterArr[0]; // Each item is an array with one participant
+                  if (!chatter) return null;
+
+                  return (
+                    <div
+                      key={chatter._id || index}
+                      className={`flex items-center gap-3 px-4 py-3  cursor-pointer rounded-full border transition-all duration-200 group
+    ${userToChatWith === chatter._id
+                          ? "bg-yellow-400/20 border-yellow-400/40"
+                          : "bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/40"
+                        }`}
+                      onClick={() => {
+                        console.log("Selected:", chatter._id)
+                        router.push(`/chat/${chatter._id}`)
+                      }}
+                    >
+                      {/* Avatar */}
+                      <div
+                        className="w-9 h-9 rounded-full border-2 border-zinc-600 group-hover:border-yellow-500 flex items-center justify-center text-white font-bold text-sm shrink-0 overflow-hidden transition-colors"
+                        style={{ backgroundColor: chatter.avatarColor || "#3b3b3b" }}
+                      >
+                        {chatter.avatarUrl ? (
+                          <img
+                            src={chatter.avatarUrl}
+                            alt={chatter.userName}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          chatter.userName?.[0]?.toUpperCase() || "?"
+                        )}
+                      </div>
+
+                      {/* Name & Email */}
+                      <div className="flex flex-col min-w-0 flex-1">
+                        <span className="text-sm font-semibold text-zinc-200 group-hover:text-white truncate">
+                          {chatter.userName || "Unknown"}
+                        </span>
+                        <span className="text-xs text-zinc-500 truncate">
+                          {chatter.email || ""}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
+
           </div>
 
           {/* Bottom settings */}
           <div className="px-4 py-3 border-t border-white/[0.06] flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-full bg-amber-400/20 flex items-center justify-center text-sm">🔥</div>
-              <span className="text-white/40 text-xs">My Profile</span>
+            <div className="flex items-center justify-center h-full py-10 gap-3">
+              {/* You / profile pill */}
+              <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-full px-8.5 py-1 cursor-pointer" onClick={() => {
+                router.push("/profile")
+              }}>
+                <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
+                  <img src={user.avatarUrl} alt="profile" className=' w-full h-full rounded-4xl' />
+                </div>
+                <span className="text-white/50 text-[11px] font-medium">{user.userName}</span>
+              </div>
+
+              {/* ✅ New button */}
+              <button
+                onClick={() => router.push('/explore')} // change route as needed
+                className=" flex gap-2 mt-2 px-4 py-1 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 
+                text-amber-400 text-xs font-semibold border border-amber-400/20 
+                hover:border-amber-400/40 transition-all duration-200 cursor-pointer"
+              >
+
+                Explore
+                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+                </svg>
+              </button>
+
             </div>
-            <button className="text-white/20 hover:text-white/50 transition-colors cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="3" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
-              </svg>
-            </button>
+
           </div>
         </aside>
 
