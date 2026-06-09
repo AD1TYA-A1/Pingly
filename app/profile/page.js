@@ -120,10 +120,10 @@ export default function Profile() {
 
 
 
-      let dataToSend = JSON.stringify({
+      let dataToSend = {
         ...form,
         avatarUrl: finalAvatarURL  // ← add it here explicitly
-      })
+      }
       // console.log(form);
       let config = {
         method: 'post',

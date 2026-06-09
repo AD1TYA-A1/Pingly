@@ -143,11 +143,13 @@ export default function SignUp() {
       email: form.email,
       otp: form.otp
     }
+    console.log(otpPayload);
+
     // Checking OTP FIRST 
     await fetch("/api/verifyOtp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: otpPayload,
+      body: JSON.stringify(otpPayload),
     }).then(async (response) => {
       const result = await response.json();
       console.log(result);
@@ -159,7 +161,7 @@ export default function SignUp() {
         }).then(async (response) => {
           const result = await response.json();
 
-          if (response.success) {
+          if (result.success) {
             // ✅ Success
             toast.success(result.message || "Account created successfully! 🎉", {
               position: "top-right",
@@ -196,13 +198,14 @@ export default function SignUp() {
             console.error(error);
           });
 
-      }
-      return toast.error("Invalid OTP 😵", {
-        position: "top-right",
-        autoClose: 5000,
-        theme: "dark",
-      });
+      } else {
+        return toast.error("Invalid OTP 😵", {
+          position: "top-right",
+          autoClose: 5000,
+          theme: "dark",
+        });
 
+      }
     }).catch((error) => {
       // ❌ Network error
       toast.error("Network error. Try again 😵", {
@@ -216,19 +219,8 @@ export default function SignUp() {
 
 
 
-    return toast("Redirectinggg!!! 🍃", {
-      position: "top-right",
-      autoClose: 5000,
-      hideProgressBar: false,
-      closeOnClick: false,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "dark",
-      // transition: Bounce,
-    });
+    
 
-    router.push("/chat")
 
   };
 
