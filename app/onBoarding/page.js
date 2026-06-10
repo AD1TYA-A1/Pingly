@@ -2,6 +2,8 @@
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const STATUSES = [
   { label: "Available", color: "#22c55e" },
@@ -17,9 +19,8 @@ const AVATAR_COLORS = [
 
 const EMOJIS = ["🔥", "⚡", "💀", "🚀", "👑", "🎯", "💎", "🌙", "⚔️", "🦅"];
 
-
 export default function Onboarding() {
-  let avatarURL = ""
+  let avatarURL = "";
   const [step, setStep] = useState(1);
   const [preview, setPreview] = useState(null);
   const [dragging, setDragging] = useState(false);
@@ -31,10 +32,10 @@ export default function Onboarding() {
     emoji: "🔥",
     tagline: "",
   });
-  const [avatar, setAvatar] = useState("")
+  const [avatar, setAvatar] = useState("");
   const canvasRef = useRef(null);
   const fileRef = useRef(null);
-  const [isloading, setIsloading] = useState(false)
+  const [isloading, setIsloading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -71,23 +72,21 @@ export default function Onboarding() {
 
   const handleFile = (file) => {
     if (!file || !file.type.startsWith("image/")) return;
-    setAvatar(file)
+    setAvatar(file);
     const url = URL.createObjectURL(file);
     setPreview(url);
-
-
   };
 
   const compressImage = (file) => {
     return new Promise((resolve) => {
-      const canvas = document.createElement('canvas');
+      const canvas = document.createElement("canvas");
       const img = new Image();
       img.src = URL.createObjectURL(file);
       img.onload = () => {
         canvas.width = 400;
         canvas.height = 400;
-        canvas.getContext('2d').drawImage(img, 0, 0, 400, 400);
-        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', 0.7);
+        canvas.getContext("2d").drawImage(img, 0, 0, 400, 400);
+        canvas.toBlob((blob) => resolve(blob), "image/jpeg", 0.7);
       };
     });
   };
@@ -98,64 +97,104 @@ export default function Onboarding() {
     handleFile(e.dataTransfer.files[0]);
   };
 
+  // ─── Validation ──────────────────────────────────────────────────────────────
+
+  const toastOpts = {
+    position: "top-right",
+    autoClose: 5000,
+    hideProgressBar: false,
+    closeOnClick: false,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "dark",
+  };
+
+  const validateStep = (currentStep) => {
+    if (currentStep === 1) {
+      // Avatar upload is optional (they have a generated one), so step 1 always passes.
+      // If you want to force an upload, uncomment below:
+      // if (!preview) {
+      //   toast.error("Please upload a profile picture ❌", toastOpts);
+      //   return false;
+      // }
+      return true;
+    }
+
+    if (currentStep === 2) {
+      if (!form.displayName.trim()) {
+        toast.error("Display name can't be empty ❌", toastOpts);
+        return false;
+      }
+      if (form.displayName.trim().length > 8) {
+        toast.error("Display name must be 8 characters or less ❌", toastOpts);
+        return false;
+      }
+      if (!form.tagline.trim()) {
+        toast.error("Tagline can't be empty ❌", toastOpts);
+        return false;
+      }
+      if (!form.bio.trim()) {
+        toast.error("Bio can't be empty ❌", toastOpts);
+        return false;
+      }
+      return true;
+    }
+
+    if (currentStep === 3) {
+      // Status always has a default, but guard anyway
+      if (!form.status) {
+        toast.error("Please pick a status ❌", toastOpts);
+        return false;
+      }
+      return true;
+    }
+
+    return true;
+  };
+
+  const handleContinue = () => {
+    if (!validateStep(step)) return;           // blocked — toast already fired
+    if (step < totalSteps) {
+      setStep(step + 1);
+    } else {
+      submit();
+    }
+  };
+
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const totalSteps = 3;
 
   async function submit() {
-    setIsloading(true)
+    setIsloading(true);
     try {
-      // console.log(form);
-      // console.log(preview);
-
-      // Upload to Cloudinary via API route
       const formData = new FormData();
-      // ✅ Fix — compress first then send
       const compressed = await compressImage(avatar);
-      formData.append('image', compressed, 'avatar.jpg');
-      const res = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-      });
-
+      formData.append("image", compressed, "avatar.jpg");
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
       const data = await res.json();
-      console.log(data);
-      console.log(data.url);
       avatarURL = data.url;
-      setForm(prev => ({ ...prev, avatarURL })); // save cloud URL
-
-
-
+      setForm((prev) => ({ ...prev, avatarURL }));
     } catch (error) {
-      console.error('Upload failed:', error);
-    }
-    finally {
-      setIsloading(false);  // stop loading whether success or fail
+      console.error("Upload failed:", error);
+    } finally {
+      setIsloading(false);
     }
 
     try {
-
-      let data = JSON.stringify({
-        ...form,
-        avatarUrl: avatarURL  // ← add it here explicitly
-      })
+      let data = JSON.stringify({ ...form, avatarUrl: avatarURL });
       let config = {
-        method: 'post',
+        method: "post",
         maxBodyLength: Infinity,
-        url: '/api/users/profile',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: data
+        url: "/api/users/profile",
+        headers: { "Content-Type": "application/json" },
+        data: data,
       };
-
       axios.request(config)
-        .then((response) => {
-          console.log(response.data);
-        })
-        .catch((error) => {
-          console.log(error);
-        });
-
-      router.push("/chat")
+        .then((response) => { console.log(response.data); })
+        .catch((error) => { console.log(error); });
+      router.push("/chat");
     } catch (error) {
       console.log(error);
     }
@@ -163,16 +202,16 @@ export default function Onboarding() {
 
   return (
     <>
+      {/* Toast container — render once at top level */}
+      <ToastContainer />
+
       <div>
-
         <div>
-
-
-          <div className=" bg-black min-h-screen flex items-center justify-center overflow-x-hidden">
+          <div className="bg-black min-h-screen flex items-center justify-center overflow-x-hidden">
             <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none" />
             <div className="absolute w-80 h-80 rounded-full bg-amber-500/8 blur-3xl pointer-events-none" />
 
-            <div className=" mt-10 relative z-10 w-full max-w-[420px] mx-4">
+            <div className="mt-10 relative z-10 w-full max-w-[420px] mx-4">
 
               {/* Header */}
               <div className="text-center mb-6">
@@ -181,7 +220,7 @@ export default function Onboarding() {
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
                   </svg>
                 </div>
-                <div className="text-white font-bold text-4xl mb-2 tracking-tight   ">Set up your profile</div>
+                <div className="text-white font-bold text-4xl mb-2 tracking-tight">Set up your profile</div>
                 <p className="text-white/40 text-sm mt-1">Let the arena know who you are</p>
               </div>
 
@@ -200,14 +239,13 @@ export default function Onboarding() {
                   <div className="flex flex-col gap-5">
                     <p className="text-white/60 text-xs uppercase tracking-widest font-medium">Step 1 — Your look</p>
 
-                    {/* Drop zone */}
                     <div
                       onClick={() => fileRef.current.click()}
                       onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
                       onDragLeave={() => setDragging(false)}
                       onDrop={onDrop}
                       className={`relative flex flex-col items-center justify-center h-40 rounded-2xl border-2 border-dashed cursor-pointer transition-all duration-200
-              ${dragging ? "border-amber-400/80 bg-amber-400/5" : "border-white/10 hover:border-white/25 hover:bg-white/[0.03]"}`}
+                        ${dragging ? "border-amber-400/80 bg-amber-400/5" : "border-white/10 hover:border-white/25 hover:bg-white/[0.03]"}`}
                     >
                       {preview ? (
                         <img src={preview} alt="avatar" className="w-24 h-24 rounded-full object-cover border-2 border-amber-400/50" />
@@ -222,36 +260,25 @@ export default function Onboarding() {
                       <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFile(e.target.files[0])} />
                     </div>
 
-                    {/* Avatar color */}
                     <div className="flex flex-col gap-2">
                       <label className="text-white/50 text-xs font-medium tracking-widest uppercase">Avatar color</label>
                       <div className="flex gap-2 flex-wrap">
                         {AVATAR_COLORS.map((c) => (
-                          <button
-                            key={c}
-                            onClick={() => setForm({ ...form, avatarColor: c })}
+                          <button key={c} onClick={() => setForm({ ...form, avatarColor: c })}
                             className="w-7 h-7 rounded-full transition-all duration-150 cursor-pointer"
-                            style={{
-                              background: c,
-                              outline: form.avatarColor === c ? `2px solid ${c}` : "none",
-                              outlineOffset: "2px",
-                              opacity: form.avatarColor === c ? 1 : 0.5,
-                            }}
+                            style={{ background: c, outline: form.avatarColor === c ? `2px solid ${c}` : "none", outlineOffset: "2px", opacity: form.avatarColor === c ? 1 : 0.5 }}
                           />
                         ))}
                       </div>
                     </div>
 
-                    {/* Emoji */}
                     <div className="flex flex-col gap-2">
                       <label className="text-white/50 text-xs font-medium tracking-widest uppercase">Signature emoji</label>
                       <div className="flex gap-2 flex-wrap">
                         {EMOJIS.map((e) => (
-                          <button
-                            key={e}
-                            onClick={() => setForm({ ...form, emoji: e })}
+                          <button key={e} onClick={() => setForm({ ...form, emoji: e })}
                             className={`w-9 h-9 rounded-xl text-lg flex items-center justify-center cursor-pointer transition-all duration-150
-                    ${form.emoji === e ? "bg-amber-400/20 border border-amber-400/50" : "bg-white/5 border border-white/10 hover:bg-white/10"}`}
+                              ${form.emoji === e ? "bg-amber-400/20 border border-amber-400/50" : "bg-white/5 border border-white/10 hover:bg-white/10"}`}
                           >
                             {e}
                           </button>
@@ -266,19 +293,24 @@ export default function Onboarding() {
                   <div className="flex flex-col gap-5">
                     <p className="text-white/60 text-xs uppercase tracking-widest font-medium">Step 2 — Your identity</p>
 
-                    {/* Display name */}
                     <div className="flex flex-col gap-1.5">
-                      <label className="text-white/50 text-xs font-medium tracking-widest uppercase">Display name</label>
+                      <label className="text-white/50 text-xs font-medium tracking-widest uppercase">
+                        Display name
+                        {/* Live character counter */}
+                        <span className={`ml-2 normal-case tracking-normal font-normal ${form.displayName.length > 8 ? "text-red-400" : "text-white/30"}`}>
+                          {form.displayName.length}/8
+                        </span>
+                      </label>
                       <input
                         type="text"
                         placeholder="How you appear in chat"
                         value={form.displayName}
                         onChange={(e) => setForm({ ...form, displayName: e.target.value })}
-                        className="bg-white/[0.06] border border-white/[0.10] rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 outline-none focus:border-amber-400/50 transition-all duration-200"
+                        className={`bg-white/[0.06] border rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 outline-none transition-all duration-200
+                          ${form.displayName.length > 8 ? "border-red-400/60 focus:border-red-400" : "border-white/[0.10] focus:border-amber-400/50"}`}
                       />
                     </div>
 
-                    {/* Tagline */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-white/50 text-xs font-medium tracking-widest uppercase">Tagline</label>
                       <input
@@ -290,7 +322,6 @@ export default function Onboarding() {
                       />
                     </div>
 
-                    {/* Bio */}
                     <div className="flex flex-col gap-1.5">
                       <label className="text-white/50 text-xs font-medium tracking-widest uppercase">Bio</label>
                       <textarea
@@ -309,7 +340,6 @@ export default function Onboarding() {
                   <div className="flex flex-col gap-5">
                     <p className="text-white/60 text-xs uppercase tracking-widest font-medium">Step 3 — Your status</p>
 
-                    {/* Status picker */}
                     <div className="flex flex-col gap-2">
                       <label className="text-white/50 text-xs font-medium tracking-widest uppercase">Current status</label>
                       <div className="flex flex-col gap-2">
@@ -318,7 +348,7 @@ export default function Onboarding() {
                             key={s.label}
                             onClick={() => setForm({ ...form, status: s })}
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl border cursor-pointer transition-all duration-150 text-left
-                    ${form.status.label === s.label ? "border-amber-400/40 bg-amber-400/5" : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"}`}
+                              ${form.status.label === s.label ? "border-amber-400/40 bg-amber-400/5" : "border-white/10 bg-white/[0.03] hover:bg-white/[0.06]"}`}
                           >
                             <div className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: s.color, boxShadow: `0 0 6px ${s.color}` }} />
                             <span className="text-white/80 text-sm font-medium">{s.label}</span>
@@ -328,7 +358,6 @@ export default function Onboarding() {
                       </div>
                     </div>
 
-                    {/* Preview card */}
                     <div className="flex flex-col gap-2">
                       <label className="text-white/50 text-xs font-medium tracking-widest uppercase">Preview</label>
                       <div className="flex items-center gap-3 bg-white/[0.06] border border-white/10 rounded-2xl p-4">
@@ -364,37 +393,22 @@ export default function Onboarding() {
                       Back
                     </button>
                   )}
+
                   {isloading ? (
                     <button
-                      onClick={() => {
-                        if (step < totalSteps) setStep(step + 1); else {
-                          // router.push("/chat"); 
-                          // submit()
-                          // console.log(form);
-
-                        }
-                      }}
                       disabled
-                      className=" flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20"
+                      className="flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20"
                     >
                       {step === totalSteps ? "Loading..." : "Continue.."}
                     </button>
                   ) : (
                     <button
-                      onClick={
-                        () => {
-                          if (step < totalSteps) setStep(step + 1); else {
-                            // router.push("/chat"); 
-                            console.log(form);
-                            submit()
-
-                          }
-                        }}
+                      onClick={handleContinue}
                       className="flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20"
                     >
                       {step === totalSteps ? "Enter the chat →" : "Continue"}
-                    </button>)}
-
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -402,9 +416,7 @@ export default function Onboarding() {
             </div>
           </div>
         </div>
-      </div >
-
+      </div>
     </>
-
   );
 }

@@ -836,6 +836,9 @@ const page = () => {
                                                 <p className={`${isMe ? "text-amber-100" : "text-white/80"} text-sm break-words overflow-wrap-anywhere`}>
                                                     {chat.message}
                                                 </p>
+                                                <p className={`${isMe ? "text-amber-100" : "text-white/80"} text-sm break-words overflow-wrap-anywhere`}>
+                                                    {chat.date}
+                                                </p>
                                             </div>
                                             <div ref={messagesEndRef} /> {/* ✅ scroll target */}
                                         </div>
