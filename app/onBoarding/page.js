@@ -377,7 +377,7 @@ export default function Onboarding() {
                       disabled
                       className=" flex-1 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black text-sm font-semibold transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20"
                     >
-                      {step === totalSteps ? "Loading..." : "Continue"}
+                      {step === totalSteps ? "Loading..." : "Continue.."}
                     </button>
                   ) : (
                     <button
