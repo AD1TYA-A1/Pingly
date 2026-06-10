@@ -12,6 +12,7 @@ export default function SignUp() {
   const canvasRef = useRef(null);
   const router = useRouter();
   const [loggingIn, setLoggingIn] = useState(false)
+  const [resetPassword, setResetPassword] = useState(false)
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   //Contains BG effect 
@@ -90,6 +91,7 @@ export default function SignUp() {
           });
           router.push("/chat")
         } else {
+          setResetPassword(true)
           toast.error('Invalid Credentials ❌', {
             position: "top-right",
             autoClose: 5000,
@@ -197,6 +199,15 @@ export default function SignUp() {
               </div>
 
             </div>
+            {resetPassword && <div className="text-center mt-2">
+              <div className="text-white/40 text-sm">
+                Forgot your password?{" "}
+                <div onClick={()=>{router.push("/resetPassword")}} className="text-yellow-400 hover:underline cursor-pointer font-semibold">
+                  Click here to reset
+                </div>
+              </div>
+            </div>}
+
             {/* Submit */}
             <button className="w-full mt-6 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black font-semibold py-2.5 rounded-xl text-sm tracking-wide transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20" onClick={
               logIn
