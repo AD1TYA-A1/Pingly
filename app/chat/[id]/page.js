@@ -11,7 +11,8 @@ import UsersLoadingSkeleton from '@/app/components/sideBarSkeleton/page'
 
 const page = () => {
 
-
+    const scrollBottom = useRef()
+    let scrolltobottom = 1;
     const [chattersLoading, setChattersLoading] = useState(true)
     // const { io } = require("socket.io-client");
 
@@ -34,6 +35,18 @@ const page = () => {
     const [moreMessagesPresentOrNot, setMoreMessagesPresentOrNot] = useState(true)
     const justSentMessage = useRef(false);
     const [lastID, setLastID] = useState("")
+
+
+    useEffect(() => {
+
+        if (scrolltobottom == 1) {
+            if (scrollBottom.current) {
+                scrollBottom.current.scrollTop = scrollBottom.current.scrollHeight
+                scrolltobottom--;
+            }
+        }
+
+    }, [myChats])
 
 
 
@@ -805,7 +818,11 @@ const page = () => {
                             </div>
 
                             {/* Messages area */}
-                            {haveChattedWithUser ? (<div onScroll={handleScroll} className="messages-container flex-1 overflow-y-auto min-h-0 px-5 py-6 flex flex-col gap-3">
+                            {haveChattedWithUser ? (<div onScroll={handleScroll}
+
+                                className="messages-container flex-1 overflow-y-auto min-h-0 px-5 py-6 flex flex-col gap-3" ref={scrollBottom}
+
+                            >
                                 <div className="flex justify-center cursor-pointer" onClick={handleScroll}>
                                     <span className="text-white/40 text-[10px] bg-white/[0.04] px-3 py-1 rounded-full">{moreMessagesPresentOrNot ? "Scroll Up To Load More" : "Your Caught Up"}</span>
                                 </div>
@@ -823,7 +840,7 @@ const page = () => {
                                             {/* Avatar */}
                                             {!isMe && (
                                                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0"
-                                                    style={{ background: selectedUser[0].color }}>
+                                                    style={{ background: selectedUser[0].avatarColor }}>
                                                     {selectedUser[0].emoji}
                                                 </div>
                                             )}
