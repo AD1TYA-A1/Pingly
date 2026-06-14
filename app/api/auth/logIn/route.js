@@ -25,10 +25,10 @@ export async function POST(req) {
         const cookieStore = await cookies();
         cookieStore.set('token', token, {
             httpOnly: true,    // JS can't access it (more secure)
-            secure: false,     // set true in production
+            secure: true,     // set true in production
             // OPTION A: Remove maxAge entirely to make it a session cookie
             // OPTION B: Set a 10-year maxAge so they stay logged in even if they close the browser:
-            // maxAge: 60 * 60 * 24 * 365 * 10            path: '/',
+            maxAge: 60 * 60 * 24 * 365 * 10        //    path: '/',
         });
 
         return NextResponse.json({ success: true, message: "Log In Success" })

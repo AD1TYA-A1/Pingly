@@ -8,11 +8,21 @@ import { usePathname } from 'next/navigation'
 import socket from '@/app/lib/socket'
 import ChatLoadingSkeleton from '@/app/components/Chatskeleton/page'
 import UsersLoadingSkeleton from '@/app/components/sideBarSkeleton/page'
+import { time } from 'three/tsl'
 
 const page = () => {
+    // const today = new Date()
+    // console.log(today);
+
+    // const yyyy = today.getFullYear();                  // 2026
+    // const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-11, pads to "06"
+    // const dd = String(today.getDate()).padStart(2, '0');    // Pads to "14"
+
+    // const formattedDate = `${yyyy}-${mm}-${dd}`;
+    // console.log(formattedDate);
 
     const scrollBottom = useRef()
-    let scrolltobottom = 1;
+    const [scrolltobottom, setScrolltobottom] = useState(true)
     const [chattersLoading, setChattersLoading] = useState(true)
     // const { io } = require("socket.io-client");
 
@@ -39,13 +49,12 @@ const page = () => {
 
     useEffect(() => {
 
-        if (scrolltobottom == 1) {
+        if (scrolltobottom) {
             if (scrollBottom.current) {
                 scrollBottom.current.scrollTop = scrollBottom.current.scrollHeight
-                scrolltobottom--;
+                setScrolltobottom(false)
             }
         }
-
     }, [myChats])
 
 
@@ -254,6 +263,77 @@ const page = () => {
             .catch((error) => {
                 console.log(error);
             });
+    }
+
+    function yourTimeStap(timeStamp) {
+        // console.log(timeStamp);
+        // 2026-06-14T07:35:32.060Z
+
+        let date = timeStamp.split("T")[0]  // 2026-06-04
+        let time = timeStamp.split("T")[1].slice(0, 5) // 07:33
+
+        let hour = parseInt(time.split(":")[0])
+        // console.log(hour);
+        let minutes = parseInt(time.split(":")[1])
+        hour = hour + 5;
+        minutes = minutes + 30
+        if (minutes > 60) {
+            minutes = minutes - 60
+            hour = hour + 1
+        }
+
+        if (minutes < 10) {
+            minutes = minutes.toString()
+            minutes = "0" + minutes
+        }
+
+        // console.log(hour, ":", minutes);
+        if (hour < 12) {
+            // console.log(hour);
+            // console.log(hour);
+
+            if (hour < 10) {
+
+                hour = hour.toString()
+                hour = "0" + hour
+                console.log("HOUR!=10 || HOUT!=11");
+                console.log(hour);
+
+            }
+            const timePayload = {
+                hour,
+                minutes,
+                meridiem: "AM"
+            }
+            return timePayload
+        } else if (hour > 12) {
+            hour = hour - 12
+            // console.log(hour);
+
+            if (hour < 10) {
+
+                hour = hour.toString()
+                hour = "0" + hour
+                console.log("HOUR!=10 || HOUT!=11");
+                console.log(hour);
+
+            }
+            const timePayload = {
+                hour,
+                minutes,
+                meridiem: "PM"
+            }
+            return timePayload
+        } else {
+            const timePayload = {
+                hour,
+                minutes,
+                meridiem: "PM"
+            }
+            return timePayload
+
+        }
+
     }
 
     const handleScroll = (e) => {
@@ -549,7 +629,9 @@ const page = () => {
 
                 console.log("Setting My chats");
 
-                setMyChats((prev) => [...prev, { ...msgData, _id: Date.now().toString() }])
+                const date = new Date()
+                setMyChats((prev) => [...prev, { ...msgData, _id: date.toLocaleTimeString() }])
+                // console.log(date);
 
 
                 console.log("Setted My chats");
@@ -853,9 +935,30 @@ const page = () => {
                                                 <p className={`${isMe ? "text-amber-100" : "text-white/80"} text-sm break-words overflow-wrap-anywhere`}>
                                                     {chat.message}
                                                 </p>
-                                                <p className={`${isMe ? "text-amber-100" : "text-white/80"} text-sm break-words overflow-wrap-anywhere`}>
-                                                    {chat.date}
-                                                </p>
+                                                <div className={` ${isMe ? "items-end" : " items-start"} text-xs 
+                                                       flex flex-col font-light break-words overflow-wrap-anywhere text-stone-400/70`}>
+
+
+                                                    {chat.date ? (
+                                                        (() => {
+                                                            const chatTime = yourTimeStap(chat.date)
+                                                            return <span>
+                                                                {chatTime.hour}:{chatTime.minutes} {chatTime.meridiem}
+                                                            </span>
+
+                                                        })()
+
+                                                    )
+                                                        :
+                                                        (`${chat._id.slice(0, 5)} ${chat._id.split(" ")[1]}`)
+                                                    }
+
+
+
+
+
+
+                                                </div>
                                             </div>
                                             <div ref={messagesEndRef} /> {/* ✅ scroll target */}
                                         </div>
