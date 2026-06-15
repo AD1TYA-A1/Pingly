@@ -1,68 +1,115 @@
 "use client";
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import "./components/Particles.css";
-
-import Particles from "./components/lightbg";
 import { useRouter } from "next/navigation";
-const page = () => {
+
+const Page = () => {
   const router = useRouter();
-  const [isHidden, setisHidden] = useState(false);
-  console.log(isHidden);
+  const [loading, setLoading] = useState(false);
+
+  const handleEnroll = () => {
+    setLoading(true);
+    setTimeout(() => router.push("/logIn"), 1000);
+  };
 
   return (
-    <div className=" w-screen h-screen bg-black  ">
-      <div className="absolute inset-0">   {/* ← wrap Particles */}
-        <Particles
-          particleColors={["#ffffff", "#ffffff"]}
-          particleCount={2000}
-          particleSpread={15}
-          speed={0.2}
-          particleBaseSize={150}
-          moveParticlesOnHover={true}
-          alphaParticles={true}
-          disableRotation={false}
-        />
-      </div>
+    <div className="relative w-screen h-screen bg-black flex flex-col items-center justify-center overflow-hidden px-4">
 
-      <div className="absolute top-0 left-0 w-full h-full flex flex-col items-center justify-center text-white lg:text-[100px] sm:text-[55px] text-[35px] font-bold">
-        Admin-Chats
-        <div className="  about   flex flex-col items-center justify-center  lg:bottom-[25%] text-center left-0 w-full lg:text-[20px] sm:text-[18px] text-[16px] p-4  ">
-          Conqueror of the Chats
-          <div
-            onClick={() => {
-              setisHidden(true);
-              console.log(isHidden);
-              setTimeout(() => {
-                router.push("/logIn");
-              }, 1000);
-            }}
-            className={`${isHidden ? "hidden" : ""
-              } bg-amber-400 w-32 mt-10 text-black hover:w-54 h-10 flex items-center justify-center text-[23px] hover:h-12 hover:text-[25px] rounded-2xl hover:rounded-3xl cursor-pointer transition-all ease-in-out duration-[400ms] `}
-          >
-            Enroll
-          </div>
-          <div className={`  mt-10 ${isHidden ? "" : "hidden"}  three-body  `}>
-            <div
-              className={` mt-10 ${isHidden ? "" : "hidden"} three-body__dot`}
-            ></div>
-            <div
-              className={` mt-10 ${isHidden ? "" : "hidden"} three-body__dot`}
-            ></div>
-            <div
-              className={` mt-10 ${isHidden ? "" : "hidden"} three-body__dot`}
-            ></div>
-          </div>
-        </div>
-      </div>
+      {/* Grid background */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          backgroundImage: `
+            linear-gradient(rgba(250,204,21,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(250,204,21,0.04) 1px, transparent 1px)
+          `,
+          backgroundSize: "48px 48px",
+        }}
+      />
 
-      {/* <button
-        className=" md:w-32 w-16 md:h-10 h-5 cursor-pointer bg-yellow-300 font-bold hover:bg-yellow-500 text-black hover:md:w-42 hover:w-21 transition-all duration-300 ease-in-out md:text-[30px] text-[15px]"
+      {/* Radial glow */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: "600px",
+          height: "600px",
+          borderRadius: "50%",
+          background: "radial-gradient(circle, rgba(250,204,21,0.07) 0%, transparent 70%)",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      />
+
+      {/* Version badge */}
+      <span className="mb-7 text-[11px] tracking-widest text-amber-400 border border-amber-400/25 px-4 py-1 rounded-full font-mono">
+        v1.0 · REAL-TIME MESSAGING
+      </span>
+
+      {/* Title */}
+      <h1
+        className="text-white font-bold text-center leading-none"
+        style={{ fontSize: "clamp(52px, 10vw, 88px)", letterSpacing: "-0.03em" }}
       >
-        Submit
-      </button> */}
+        Admin<span className="text-amber-400">-</span>Chats
+      </h1>
+
+      {/* Subtitle with blinking cursor */}
+      <p className="mt-4 mb-9 font-mono text-[13px] text-white/35 tracking-widest flex items-center gap-1">
+        conqueror of the chats
+        <span className="inline-block w-2 h-[14px] bg-amber-400 ml-1 animate-pulse" />
+      </p>
+
+      {/* CTA or loader */}
+      {!loading ? (
+        <button
+          onClick={handleEnroll}
+          className="flex items-center gap-2 bg-amber-400 hover:bg-yellow-300 text-black font-bold text-[15px] px-8 py-[14px] rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_24px_rgba(250,204,21,0.28)] active:translate-y-0"
+        >
+          Enroll
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </button>
+      ) : (
+        <div className="three-body">
+          <div className="three-body__dot" />
+          <div className="three-body__dot" />
+          <div className="three-body__dot" />
+        </div>
+      )}
+
+      {/* Stats row */}
+      <div className="flex gap-7 mt-11 pt-6 border-t border-white/[0.06]">
+        {[
+          { num: "∞", label: "MESSAGES" },
+          { num: "0ms", label: "LATENCY" },
+          { num: "100%", label: "DARK MODE" },
+        ].map((s, i, arr) => (
+          <React.Fragment key={s.label}>
+            <div className="text-center">
+              <div className="text-amber-400 font-bold text-[20px]">{s.num}</div>
+              <div className="font-mono text-[10px] text-white/30 tracking-widest mt-0.5">
+                {s.label}
+              </div>
+            </div>
+            {i < arr.length - 1 && (
+              <div className="w-px bg-white/[0.08] self-stretch" />
+            )}
+          </React.Fragment>
+        ))}
+      </div>
     </div>
   );
 };
 
-export default page;
+export default Page;

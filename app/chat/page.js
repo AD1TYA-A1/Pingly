@@ -377,10 +377,10 @@ bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/4
                         {/* Name & Email */}
                         <div className="flex flex-col min-w-0 flex-1">
                           <span className="text-sm font-semibold text-zinc-200 group-hover:text-white truncate">
-                            {chatter.userName || "Unknown"}
+                            {chatter.displayName || "Unknown"}
                           </span>
                           <span className="text-xs text-zinc-500 truncate">
-                            {chatter.email || ""}
+                            {chatter.userName || ""}
                           </span>
                         </div>
                       </div>
@@ -461,6 +461,27 @@ bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/4
                 <p className="text-white/30 text-sm max-w-xs leading-relaxed">
                   Pick someone from the left to start a conversation. The arena awaits.
                 </p>
+
+                <div
+                  onClick={() => setSidebarOpen(true)}
+                  className="flex items-center gap-2 bg-amber-400 hover:bg-yellow-300 text-black font-bold text-[14px] px-5 py-[10px] rounded-xl cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_0_20px_rgba(250,204,21,0.25)] active:translate-y-0 active:shadow-none w-fit m-10"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    <line x1="12" y1="8" x2="12" y2="16" />
+                    <line x1="8" y1="12" x2="16" y2="12" />
+                  </svg>
+                  Chat
+                </div>
 
                 {/* Decorative pills */}
                 <div className="flex gap-2 mt-6 flex-wrap justify-center">

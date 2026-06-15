@@ -543,6 +543,20 @@ export default function ExplorePage() {
         className="min-h-screen"
         style={{ background: "#060606", fontFamily: "'JetBrains Mono', monospace" }}
       >
+
+        {/* ── Navbar ── */}
+        <nav className="sticky top-0 z-30 flex items-center justify-between px-6 py-3.5 bg-[#060608]/95 backdrop-blur-md border-b border-white/[0.05]">
+          <div onClick={() => {
+            router.push("/logIn")
+          }} className=" cursor-pointer flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-amber-400 flex items-center justify-center shadow-lg shadow-amber-400/30">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
+            <span className="text-white font-semibold text-sm tracking-tight">Admin-Chats</span>
+          </div>
+        </nav>
         <InkBG />
 
         {/* Scanlines */}

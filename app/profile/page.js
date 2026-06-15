@@ -379,25 +379,62 @@ export default function Profile() {
 
                   {/* Username */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-white/40 text-[10px] uppercase tracking-widest font-semibold">Username</label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-white/40 text-[10px] uppercase tracking-widest font-semibold">
+                        Username
+                      </label>
+                      <span
+                        className={`text-[10px] font-mono font-semibold transition-colors ${(form.userName || "").length >= 8
+                            ? "text-amber-400"
+                            : "text-white/30"
+                          }`}
+                      >
+                        {(form.userName || "").length}/8
+                      </span>
+                    </div>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 -translate-y-1/2 text-white/25 text-sm">@</span>
-                      <input type="text"
+                      <input
+                        type="text"
                         value={form.userName || ""}
-                        onChange={e => setForm({ ...form, userName: e.target.value })}
-                        className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-8 pr-4 py-2.5 text-white text-sm placeholder-white/20 outline-none focus:border-amber-400/50 transition-colors" />
+                        onChange={e => {
+                          if (e.target.value.length <= 8) {
+                            setForm({ ...form, userName: e.target.value });
+                          }
+                        }}
+                        maxLength={8}
+                        placeholder="max 8 chars"
+                        className="w-full bg-white/[0.05] border border-white/10 rounded-xl pl-8 pr-4 py-2.5 text-white text-sm placeholder-white/20 outline-none focus:border-amber-400/50 transition-colors"
+                      />
                     </div>
-                  </div>
-
-                  {/* Display name */}
+                  </div>                  {/* Display name */}
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-white/40 text-[10px] uppercase tracking-widest font-semibold">Display Name</label>
-                    <input type="text"
+                    <div className="flex items-center justify-between">
+                      <label className="text-white/40 text-[10px] uppercase tracking-widest font-semibold">
+                        Display Name
+                      </label>
+                      <span
+                        className={`text-[10px] font-mono font-semibold transition-colors ${(form.displayName || "").length >= 8
+                          ? "text-amber-400"
+                          : "text-white/30"
+                          }`}
+                      >
+                        {(form.displayName || "").length}/8
+                      </span>
+                    </div>
+                    <input
+                      type="text"
                       value={form.displayName || ""}
-                      onChange={e => setForm({ ...form, displayName: e.target.value })}
-                      className="bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 outline-none focus:border-amber-400/50 transition-colors" />
+                      onChange={e => {
+                        if (e.target.value.length <= 8) {
+                          setForm({ ...form, displayName: e.target.value });
+                        }
+                      }}
+                      maxLength={8}
+                      placeholder="Max 8 chars"
+                      className="bg-white/[0.05] border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 outline-none focus:border-amber-400/50 transition-colors"
+                    />
                   </div>
-
                   {/* Tagline */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-white/40 text-[10px] uppercase tracking-widest font-semibold">Tagline</label>
