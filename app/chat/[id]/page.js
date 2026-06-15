@@ -11,12 +11,6 @@ import UsersLoadingSkeleton from '@/app/components/sideBarSkeleton/page'
 import { time } from 'three/tsl'
 
 const page = () => {
-    // const today = new Date()
-    // console.log(today);
-
-    // const yyyy = today.getFullYear();                  // 2026
-    // const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-11, pads to "06"
-    // const dd = String(today.getDate()).padStart(2, '0');    // Pads to "14"
 
     // const formattedDate = `${yyyy}-${mm}-${dd}`;
     // console.log(formattedDate);
@@ -314,8 +308,8 @@ const page = () => {
 
                 hour = hour.toString()
                 hour = "0" + hour
-                console.log("HOUR!=10 || HOUT!=11");
-                console.log(hour);
+                // console.log("HOUR!=10 || HOUT!=11");
+                // console.log(hour);
 
             }
             const timePayload = {
@@ -334,6 +328,58 @@ const page = () => {
 
         }
 
+    }
+
+
+    const today = new Date()
+    // console.log(today);
+
+    const yyyy = today.getFullYear();                  // 2026
+    const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months are 0-11, pads to "06"
+    const dd = String(today.getDate()).padStart(2, '0');    // Pads to "14"
+
+    const lastDocDate = useRef("")
+
+
+    function relativeDates(date) {
+        if (lastDocDate.current === date) return null; // ← same date = no separator
+
+        //GET MONTH, DATE , YEAR FROM SPLITIING DATE STRING
+        let label = ""
+        let d = date.split("-")[2]
+        let m = date.split("-")[1]
+        let yy = date.split("-")[0]
+
+
+        // if (d + 1 == dd && m == mm && yy == yyyy && dateSeperator != "Today") {
+        //     label = "Today"
+
+        // } else if (m == mm && yy == yyyy && dateSeperator != "Yesterday") {
+        //     // if (d <) {l
+
+        //     // }
+        //     setDateSeperator("Yesterday")
+        // } else if (lastDocDate != date) {
+        //     setDateSeperator(`${d},${m}`)
+        //     return true
+        // }
+        // return false
+
+        if (Number(d) + 1 == dd && m == mm && yy == yyyy) {
+            label = "Today";
+        } else if (m == mm && yy == yyyy) {
+            label = "Yesterday";
+        } else {
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+            label = `${d}-${months[m-1]}`;
+        }
+        console.log(label);
+
+
+        lastDocDate.current = date; // update ref
+        return label; // ← new date = return label string
     }
 
     const handleScroll = (e) => {
@@ -911,57 +957,74 @@ const page = () => {
 
                                 {myChats.map((chat) => {
                                     // console.log(chat.sender);
+                                    // console.log(chat);
+                                    let date = chat.date.split("T")[0]
+                                    // console.log(date);
+
 
                                     const isMe = chat.sender === user._id; // or however you store logged-in user id
-
+                                    const seperator = relativeDates(date)
                                     return (
-                                        <div
-                                            key={chat._id}
-                                            className={`flex items-end gap-2 max-w-[70%] ${isMe ? "self-end flex-row-reverse" : ""}`}
-                                        >
-                                            {/* Avatar */}
-                                            {!isMe && (
-                                                <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0"
-                                                    style={{ background: selectedUser[0].avatarColor }}>
-                                                    {selectedUser[0].emoji}
+                                        <React.Fragment key={chat._id}>                                            {seperator != null && (
+                                            <div className="seperator">
+                                                <div className="flex items-center gap-3 my-4 px-2">
+                                                    <div className="flex-1 h-px bg-neutral-700" />
+                                                    <span className="text-xs text-neutral-500 bg-neutral-900 px-3 py-0.5 rounded-full border border-neutral-700 whitespace-nowrap tracking-wide">
+                                                        {seperator}
+                                                    </span>
+                                                    <div className="flex-1 h-px bg-neutral-700" />
                                                 </div>
-                                            )}
+                                            </div>
+                                        )}
+                                            <div
+                                                key={chat._id}
+                                                className={`flex items-end gap-2 max-w-[70%] ${isMe ? "self-end flex-row-reverse" : ""}`}
+                                            >
+                                                {/* Avatar */}
+                                                {!isMe && (
+                                                    <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0"
+                                                        style={{ background: selectedUser[0].avatarColor }}>
+                                                        {selectedUser[0].emoji}
+                                                    </div>
+                                                )}
 
-                                            {/* Bubble */}
-                                            <div className={`${isMe
-                                                ? "bg-amber-400/20 border border-amber-400/30 rounded-2xl rounded-br-sm"
-                                                : "bg-white/[0.06] border border-white/[0.08] rounded-2xl rounded-bl-sm"
-                                                } px-4 py-2.5 max-w-full min-w-0`}>
-                                                <p className={`${isMe ? "text-amber-100" : "text-white/80"} text-sm break-words overflow-wrap-anywhere`}>
-                                                    {chat.message}
-                                                </p>
-                                                <div className={` ${isMe ? "items-end" : " items-start"} text-xs 
+                                                {/* Bubble */}
+                                                <div className={`${isMe
+                                                    ? "bg-amber-400/20 border border-amber-400/30 rounded-2xl rounded-br-sm"
+                                                    : "bg-white/[0.06] border border-white/[0.08] rounded-2xl rounded-bl-sm"
+                                                    } px-4 py-2.5 max-w-full min-w-0`}>
+                                                    <p className={`${isMe ? "text-amber-100" : "text-white/80"} text-sm break-words overflow-wrap-anywhere`}>
+                                                        {chat.message}
+                                                    </p>
+                                                    <div className={` ${isMe ? "items-end" : " items-start"} text-xs 
                                                        flex flex-col font-light break-words overflow-wrap-anywhere text-stone-400/70`}>
 
 
-                                                    {chat.date ? (
-                                                        (() => {
-                                                            const chatTime = yourTimeStap(chat.date)
-                                                            return <span>
-                                                                {chatTime.hour}:{chatTime.minutes} {chatTime.meridiem}
-                                                            </span>
+                                                        {chat.date ? (
+                                                            (() => {
+                                                                const chatTime = yourTimeStap(chat.date)
+                                                                return <span>
+                                                                    {chatTime.hour}:{chatTime.minutes} {chatTime.meridiem}
+                                                                </span>
 
-                                                        })()
+                                                            })()
 
-                                                    )
-                                                        :
-                                                        (`${chat._id.slice(0, 5)} ${chat._id.split(" ")[1]}`)
-                                                    }
-
-
+                                                        )
+                                                            :
+                                                            (`${chat._id.slice(0, 5)} ${chat._id.split(" ")[1]}`)
+                                                        }
 
 
 
 
+
+
+                                                    </div>
                                                 </div>
+                                                <div ref={messagesEndRef} /> {/* ✅ scroll target */}
                                             </div>
-                                            <div ref={messagesEndRef} /> {/* ✅ scroll target */}
-                                        </div>
+                                        </React.Fragment>
+
                                     );
                                 })}
 
