@@ -373,7 +373,7 @@ const page = () => {
             const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
                 "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-            label = `${d}-${months[m-1]}`;
+            label = `${d}-${months[m - 1]}`;
         }
         console.log(label);
 
@@ -382,6 +382,16 @@ const page = () => {
         return label; // ← new date = return label string
     }
 
+    const isLoadingMore = useRef(false);
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+    // Scroll to bottom only when NOT loading older messages
+    useEffect(() => {
+        if (!isLoadingMore.current) {
+            scrollToBottom();
+        }
+    }, [myChats]);
     const handleScroll = (e) => {
         // if (chatContainerRef.current.scrollTop === 0 && hasMore) {
         //     fetchChats(lastId)  // user hit the top, load more
@@ -391,8 +401,8 @@ const page = () => {
         // console.log("e is ", e.target.scrollTop);
         if (e.target.scrollTop == 0) {
             if (moreMessagesPresentOrNot) {
-
                 console.log("You Have Reached Top");
+                isLoadingMore.current = true;  // ← flag: don't scroll to bottom
                 setLoadingMoreChats(true)
                 getMyConversationWithUser(true)
                 setLoadingMoreChats(false)
@@ -401,6 +411,8 @@ const page = () => {
             else {
                 console.log("Reached End");
             }
+        } else {
+            isLoadingMore.current = false;  // ← user scrolled away from top, reset
         }
 
     }
@@ -663,7 +675,8 @@ const page = () => {
                     socketSender: socket.id,  // who sent it
                     sender: user._id,
                     room: roomId,
-                    time: new Date().toLocaleTimeString(),
+                    date: new Date().toISOString()
+                    // → "2026-06-16T07:27:37.455Z"
                 };
                 console.log(msgData);
 
@@ -957,13 +970,17 @@ const page = () => {
 
                                 {myChats.map((chat) => {
                                     // console.log(chat.sender);
+                                    console.log(chat);
+                                    let date = ""
                                     // console.log(chat);
-                                    let date = chat.date.split("T")[0]
+
+
+                                    date = chat.date.split("T")[0]
+                                    const seperator = relativeDates(date)
                                     // console.log(date);
 
 
                                     const isMe = chat.sender === user._id; // or however you store logged-in user id
-                                    const seperator = relativeDates(date)
                                     return (
                                         <React.Fragment key={chat._id}>                                            {seperator != null && (
                                             <div className="seperator">
@@ -1027,6 +1044,8 @@ const page = () => {
 
                                     );
                                 })}
+                                <div ref={messagesEndRef} />  {/* ✅ move it HERE, after the map */}
+
 
                             </div>) : (
                                 <div className="flex-1 flex flex-col items-center justify-center gap-3 px-5 py-6">

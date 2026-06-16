@@ -217,9 +217,9 @@ export default function Profile() {
                     {/* Name block */}
                     <div className="px-1 mb-4">
                         <div className="flex items-center gap-3 flex-wrap mb-1">
-                            <h1 className="text-white font-black text-4xl sm:text-5xl uppercase tracking-tight leading-none">
-                                {user.userName}
-                            </h1>
+                            <div className="text-white font-black text-4xl sm:text-5xl uppercase tracking-tight leading-none">
+                                {user.displayName}
+                            </div>
                             <span className="text-3xl">{user.emoji}</span>
                             <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
                                 style={{ background: (user.status?.color || "#22c55e") + "22", color: user.status?.color || "#22c55e", border: `1px solid ${user.status?.color}44` }}>
