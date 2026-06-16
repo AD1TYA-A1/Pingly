@@ -264,16 +264,19 @@ export default function Profile() {
           </div>
 
           {/* Name block */}
-          <div className="px-1 mb-4">
-            <div className="flex items-center gap-3 flex-wrap mb-1">
-              <h1 className="text-white font-black text-4xl sm:text-5xl uppercase tracking-tight leading-none">
+          <div className="px-1 mb-4 ">
+            <div className="flex  gap-3 flex-wrap mb-1 flex-col justify-start ">
+              <div className="text-white font-black text-[44px] md:text-4xl  uppercase tracking-tight leading-none ">
                 {user.displayName}
-              </h1>
-              <span className="text-3xl">{user.emoji}</span>
-              <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
-                style={{ background: (user.status?.color || "#22c55e") + "22", color: user.status?.color || "#22c55e", border: `1px solid ${user.status?.color}44` }}>
-                {user.status?.label}
-              </span>
+              </div>
+              <div className="">
+
+                <span className="text-3xl">{user.emoji}</span>
+                <span className="text-[11px] font-semibold px-2.5 py-1 rounded-full"
+                  style={{ background: (user.status?.color || "#22c55e") + "22", color: user.status?.color || "#22c55e", border: `1px solid ${user.status?.color}44` }}>
+                  {user.status?.label}
+                </span>
+              </div>
             </div>
             <p className="text-white/30 text-sm font-medium">@{user.userName}</p>
           </div>
@@ -385,8 +388,8 @@ export default function Profile() {
                       </label>
                       <span
                         className={`text-[10px] font-mono font-semibold transition-colors ${(form.userName || "").length >= 8
-                            ? "text-amber-400"
-                            : "text-white/30"
+                          ? "text-amber-400"
+                          : "text-white/30"
                           }`}
                       >
                         {(form.userName || "").length}/8
