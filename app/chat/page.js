@@ -5,6 +5,8 @@ import React from 'react'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import UsersLoadingSkeleton from '../components/sideBarSkeleton/page'
+import AiAssistantOptions from '../components/AIToggler/AiAssistantOptions'
+
 
 const page = () => {
   // const chatters = [];
@@ -16,7 +18,7 @@ const page = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [myChatters, setMyChatters] = useState([])
-
+  const [aiChatOpen, setAiChatOpen] = useState(false);
 
 
   useEffect(() => {
@@ -394,33 +396,61 @@ bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/4
           </div>
 
           {/* Bottom settings */}
-          <div className="px-4 py-3 border-t border-white/[0.06] flex items-center justify-between">
-            <div className="flex items-center justify-center h-full py-10 gap-3">
-              {/* You / profile pill */}
-              <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-full px-8.5 py-1 cursor-pointer" onClick={() => {
-                router.push("/profile")
-              }}>
-                <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
-                  <img src={user.avatarUrl} alt="profile" className=' w-full h-full rounded-4xl' />
-                </div>
-                <span className="text-white/50 text-[11px] font-medium">{user.userName}</span>
-              </div>
+          <div className="px-4 py-3 border-t border-white/[0.06] flex flex-col items-center justify-between">
+            <div className="flex items-center justify-center h-full flex-col py-10 gap-3 ">
+              <div className=' flex items-center justify-center gap-4'>
 
-              {/* ✅ New button */}
-              <button
-                onClick={() => router.push('/explore')} // change route as needed
-                className=" flex gap-2 mt-2 px-4 py-1 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 
+                {/* You / profile pill */}
+                <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-full px-8.5 py-1 cursor-pointer" onClick={() => {
+                  router.push("/profile")
+                }}>
+                  <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
+                    <img src={user.avatarUrl} alt="profile" className=' w-full h-full rounded-4xl' />
+                  </div>
+                  <span className="text-white/50 text-[11px] font-medium">{user.userName}</span>
+                </div>
+
+                {/* ✅ New button */}
+                <button
+                  onClick={() => router.push('/explore')} // change route as needed
+                  className=" flex gap-2 mt-2 px-4 py-1 rounded-xl bg-amber-400/10 hover:bg-amber-400/20 
                 text-amber-400 text-xs font-semibold border border-amber-400/20 
                 hover:border-amber-400/40 transition-all duration-200 cursor-pointer"
-              >
+                >
 
-                Explore
-                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="3" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
-                </svg>
+                  Explore
+                  <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="3" /><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14" />
+                  </svg>
+                </button>
+              </div>
+
+
+              {/* AI Assistant Button */}
+              <button
+                onClick={() => setAiChatOpen(true)}
+                className="flex items-center gap-2 bg-[#1c1107] border border-amber-600 rounded-full px-4 py-2 text-amber-400 text-sm hover:shadow-[0_0_12px_rgba(217,119,6,0.25)] transition-all duration-200 cursor-pointer"
+              >
+                {/* Robot icon with green online dot */}
+                <span className="relative flex items-center justify-center w-[18px] h-[18px]">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                    fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 8V4H8" /><rect width="16" height="12" x="4" y="8" rx="2" />
+                    <path d="M2 14h2M22 14h-2M9 13v2M15 13v2" />
+                  </svg>
+                  <span className="absolute -top-0.5 -right-1 w-2 h-2 bg-green-500 rounded-full border border-black" />
+                </span>
+
+                AI Assistant
+
+                {/* 24/7 badge */}
+                <span className="bg-green-500/10 border border-green-500/30 rounded-full text-[10px] px-2 py-0.5 text-green-400 tracking-wide">
+                  24/7
+                </span>
               </button>
 
             </div>
+
 
           </div>
         </aside>
@@ -444,6 +474,7 @@ bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/4
               {selectedUser ? selectedUser.name : "Admin-Chats"}
             </span>
           </div>
+
 
           {/* Empty state */}
           {!selectedUser && (
@@ -493,6 +524,12 @@ bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/4
                 </div>
               </div>
             </div>
+          )}
+
+          {aiChatOpen&&(
+            <AiAssistantOptions
+            onClose={()=>setAiChatOpen(false)}
+            />
           )}
 
           {/* Selected user chat area */}
