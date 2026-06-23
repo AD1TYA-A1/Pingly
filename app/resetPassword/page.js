@@ -180,9 +180,23 @@ export default function ResetPassword() {
             });
             console.log(error.message);
 
-        })}
+        })
+    }
 
     const handleResetPassword = () => {
+        if (newPassword.trim().length() == 0 || confirmPassword.trim().length() == 0) {
+            return toast.error('Password Fields seems empty ❌', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "dark",
+            })
+
+        }
         if (newPassword === confirmPassword) {
             setHandlingResetPassword(true)
             let data = JSON.stringify({
@@ -298,8 +312,15 @@ export default function ResetPassword() {
                                         Username
                                     </label>
                                     <input
+                                        onKeyUp={(e) => {
+                                            if (e.key === 'Enter') {
+                                                handleSendOtp()
+                                            }
+                                        }}
                                         type="text"
                                         value={username}
+                                        autoFocus
+
                                         onChange={(e) => setUsername(e.target.value)}
                                         placeholder="cooluser123"
                                         className="w-full bg-white/[0.04] border border-white/[0.08] rounded-lg px-4 py-3 text-white text-sm placeholder-white/20 focus:outline-none focus:border-yellow-400/50 transition-all duration-200"
@@ -354,13 +375,19 @@ export default function ResetPassword() {
                                                 type="text"
                                                 maxLength={6}
                                                 value={otp}
+                                                autoFocus
+                                                onKeyUp={(e) => {
+                                                    if (e.key === 'Enter') {
+                                                        handleVerifyOtp()
+                                                    }
+                                                }}
                                                 onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                                                 placeholder="Enter OTP"
                                                 className="w-full bg-white/5 border border-white/10 text-white text-center text-lg font-black tracking-[0.5em] rounded-lg px-4 py-2.5 placeholder:text-white/20 placeholder:tracking-normal focus:outline-none focus:border-yellow-400/50 transition"
                                             />
                                             <button
                                                 onClick={handleVerifyOtp}
-                                                disabled={verifyingOTPViaAPI==true}
+                                                disabled={verifyingOTPViaAPI == true}
                                                 className="w-full text-black bg-yellow-400 hover:bg-yellow-300 transition font-black text-xs px-7 py-2.5 rounded-lg disabled:bg-yellow-700 disabled:cursor-not-allowed"
                                             >
                                                 Verify OTP →
@@ -388,6 +415,7 @@ export default function ResetPassword() {
 
                                     <div className="w-full mt-5 flex flex-col gap-3">
                                         <input
+                                            autoFocus
                                             type="password"
                                             value={newPassword}
                                             onChange={(e) => setNewPassword(e.target.value)}
@@ -402,7 +430,7 @@ export default function ResetPassword() {
                                             className="w-full bg-white/5 border border-white/10 text-white text-sm font-semibold rounded-lg px-4 py-2.5 placeholder:text-white/20 focus:outline-none focus:border-yellow-400/50 transition"
                                         />
                                         <button
-                                        
+
                                             onClick={handleResetPassword}
                                             className="w-full text-black bg-yellow-400 hover:bg-yellow-300 transition font-black text-xs px-7 py-2.5 rounded-lg mt-1 disabled:bg-yellow-600 disabled:cursor-not-allowed"
                                             disabled={handlingResetPassword}

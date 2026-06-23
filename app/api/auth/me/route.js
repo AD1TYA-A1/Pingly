@@ -5,7 +5,6 @@ import jwt, { decode } from 'jsonwebtoken';
 
 export async function GET() {
     try {
-
         const cookieStore = await cookies();
         const token = cookieStore.get('token')?.value;
         const decoded = jwt.verify(token, process.env.JWT_SECRET);

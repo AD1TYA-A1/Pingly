@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { log } from "three/src/nodes/TSL.js";
 
 const MOCK_USER = {
   _id: "69d9ae99809ad9c6825c1c33",
@@ -43,9 +42,9 @@ function Avatar({ user, size = "lg", preview }) {
 }
 
 export default function Profile() {
-  const avatarChanged = useRef(false)
   const router = useRouter()
-  let avatarUrl = ""
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false)
+  const [loggingOut, setLoggingOut] = useState(false)
   const [user, setUser] = useState(null);
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({});
@@ -151,6 +150,18 @@ export default function Profile() {
     location.reload()
   };
 
+  const handleLogout = async () => {
+    setLoggingOut(true)
+    {
+
+      await fetch("/api/auth/logOut", {
+        method: "POST",
+        credentials: "include"
+      })
+      router.push("/logIn");
+    }
+  }
+
   if (!user) return (
     <div className="w-screen h-screen bg-[#060608] flex items-center justify-center">
       <div className="w-6 h-6 border-2 border-amber-400 border-t-transparent rounded-full animate-spin" />
@@ -161,6 +172,49 @@ export default function Profile() {
 
   return (
     <>
+
+      {/* Place this div wherever you want the modal to appear — e.g. conditionally rendered */}
+      {isLogoutModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+          <div className="bg-[#111111] border border-[#2a2a2a] rounded-xl p-8 w-full max-w-sm flex flex-col">
+
+            {/* Icon */}
+            <div className="w-12 h-12 rounded-full bg-amber-500/10 border border-amber-500/25 flex items-center justify-center mb-5">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+              </svg>
+            </div>
+
+            {/* Title */}
+            <h2 className="text-[#f5f5f5] text-lg font-medium mb-2">Confirm logout</h2>
+
+            {/* Description */}
+            <p className="text-sm text-[#888] leading-relaxed mb-7">
+              You'll be signed out of your account. Any unsaved changes will be lost.
+            </p>
+
+            {/* Actions */}
+            <div className="flex gap-2.5">
+              <button
+                disabled={loggingOut}
+                onClick={() => setIsLogoutModalOpen(false)}
+                className="flex-1 disabled:cursor-not-allowed 
+                disabled:bg-white/70 disabled:text-black py-2.5 rounded-lg border border-[#2a2a2a] bg-transparent text-[#aaa] text-sm font-medium hover:bg-[#1a1a1a] hover:text-[#f5f5f5] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={loggingOut}
+                onClick={handleLogout}
+                className="flex-1 disabled:cursor-not-allowed disabled:bg-amber-600 py-2.5 rounded-lg bg-amber-500 text-[#1a1000] text-sm font-medium hover:bg-amber-600 active:scale-[0.98] transition-all"
+              >
+                {loggingOut ? "Logging Out..." : "Log out"}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
       <style>{`
         .custom-scroll::-webkit-scrollbar { width: 4px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; }
@@ -195,15 +249,7 @@ export default function Profile() {
               </svg>
               Edit profile
             </button>
-            <button onClick={async () => {
-
-              await fetch("/api/auth/logOut", {
-                method: "POST",
-                credentials: "include"
-              });
-
-              router.push("/logIn");
-            }}
+            <button onClick={() => { setIsLogoutModalOpen(true) }}
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-400 hover:bg-amber-300 active:scale-95 text-black text-xs font-bold transition-all cursor-pointer shadow-lg shadow-amber-400/20">
               <svg
                 xmlns="http://www.w3.org/2000/svg"

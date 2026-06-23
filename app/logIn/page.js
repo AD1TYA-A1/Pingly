@@ -12,7 +12,7 @@ export default function SignUp() {
   const canvasRef = useRef(null);
   const router = useRouter();
   const [loggingIn, setLoggingIn] = useState(false)
-  const [resetPassword, setResetPassword] = useState(false)
+  const [resetPassword, setResetPassword] = useState(true)
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   //Contains BG effect 
@@ -52,7 +52,7 @@ export default function SignUp() {
   }, []);
 
   const logIn = (e) => {
-    e.target.disabled = true
+    // e.target.disabled = true
 
     setLoggingIn(true)
     // console.log(form.userName);
@@ -91,7 +91,7 @@ export default function SignUp() {
           });
           router.push("/chat")
         } else {
-          setResetPassword(true)
+          // setResetPassword(true)
           toast.error('Invalid Credentials ❌', {
             position: "top-right",
             autoClose: 5000,
@@ -103,12 +103,14 @@ export default function SignUp() {
             theme: "dark",
             // transition: Bounce,
           });
+          setLoggingIn(false)
+
         }
       })
       .catch((error) => {
+        setLoggingIn(false)
         console.log(error);
       });
-    setLoggingIn(false)
   }
 
   return (
@@ -152,11 +154,17 @@ export default function SignUp() {
               <div className="flex flex-col gap-1.5">
                 <label className="text-white/50 text-xs font-medium tracking-widest uppercase">Username</label>
                 <input
+                  autoFocus
                   name="userName"
                   type="text"
                   placeholder="cooluser123"
                   value={form.userName}
                   onChange={handleChange}
+                  onKeyUp={(e) => {
+                    if (e.key === 'Enter') {
+                      logIn()
+                    }
+                  }}
                   className="bg-white/[0.06] border border-white/[0.10] rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 outline-none focus:border-amber-400/50 focus:bg-white/[0.08] transition-all duration-200"
                 />
               </div>
@@ -170,6 +178,12 @@ export default function SignUp() {
                 <label className="text-white/50 text-xs font-medium tracking-widest uppercase">Password</label>
                 <div className="relative">
                   <input
+                    onKeyUp={(e) => {
+                      if (e.key === 'Enter') {
+                        logIn()
+                      }
+                    }}
+
                     name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Create a strong password"
@@ -202,16 +216,20 @@ export default function SignUp() {
             {resetPassword && <div className="text-center mt-2">
               <div className="text-white/40 text-sm">
                 Forgot your password?{" "}
-                <div onClick={()=>{router.push("/resetPassword")}} className="text-yellow-400 hover:underline cursor-pointer font-semibold">
+                <div onClick={() => { router.push("/resetPassword") }} className="text-yellow-400 hover:underline cursor-pointer font-semibold">
                   Click here to reset
                 </div>
               </div>
             </div>}
 
             {/* Submit */}
-            <button className="w-full mt-6 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black font-semibold py-2.5 rounded-xl text-sm tracking-wide transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20" onClick={
-              logIn
-            }>
+            <button
+              disabled={loggingIn}
+              className="w-full mt-6 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black font-semibold py-2.5 rounded-xl text-sm tracking-wide transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20 disabled:bg-amber-600 disabled:cursor-not-allowed
+              
+              " onClick={
+                logIn
+              }>
               {loggingIn ? "Loading..." : "LogIn"}
             </button>
 

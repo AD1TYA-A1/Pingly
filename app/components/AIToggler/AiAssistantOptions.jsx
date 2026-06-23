@@ -1,6 +1,7 @@
 // components/AiAssistantOptions.jsx
-
+import { useRouter } from "next/navigation";
 export default function AiAssistantOptions({ onClose }) {
+    const router = useRouter()
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
             <div className="relative w-full max-w-xl mx-4 bg-[#111] border border-[#2a2a2a] rounded-2xl p-7">
@@ -39,7 +40,7 @@ export default function AiAssistantOptions({ onClose }) {
                     {/* Professional Mode */}
                     <div
                         onClick={() => {
-                            console.log("Routing To Professional Route");
+                            router.push("/chatAssist/professional")
                         }}
                         className="group  bg-[#0f0f0f] border border-amber-600 rounded-xl p-5 flex flex-col gap-3 cursor-pointer hover:bg-[#1c1107] transition-colors"
                     >

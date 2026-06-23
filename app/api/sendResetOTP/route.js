@@ -37,7 +37,7 @@ export async function POST(req) {
   });
 
   // 3. Send email
-  await transporter.sendMail({
+  const emailSent = await transporter.sendMail({
     from: `"Admin-Chats" <${process.env.GMAIL_USER}>`,
     to: email,
     subject: "Your OTP Code",
@@ -53,6 +53,8 @@ export async function POST(req) {
 
   // 4. Save OTP to DB here (MongoDB)
   // await OtpModel.create({ email, otp, createdAt: new Date() })
+  console.log(emailSent);
+  
 
   return NextResponse.json({ success: true, message: "Boom! OTP just landed in your inbox 🚀" }, { status: 201 })
   // The HTTP status code 201 created is a  SUCCESS REQUEST indicating that a request was fulfilled and resulted in the creation of one or more new resources
