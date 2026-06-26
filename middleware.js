@@ -9,7 +9,7 @@ export function middleware(req) {
     // ?.value means "if cookie exists, get its value, otherwise undefined"
     // so token = either the JWT string or undefined
 
-    const protectedRoutes = ['/chat', '/onBoarding', '/profile','/explore' ];
+    const protectedRoutes = ['/chat', '/onBoarding', '/profile','/explore','/chatAssist/professional' ];
 
     // list of pages that require login
 
@@ -39,7 +39,7 @@ export function middleware(req) {
 }
 
 export const config = {
-    matcher: ['/chat/:path*', '/onBoarding/:path*', '/logIn/:path*','/profile/:path*','/explore/:path*'],
+    matcher: ['/chat/:path*', '/onBoarding/:path*', '/logIn/:path*','/profile/:path*','/explore/:path*','/chatAssist/professional/:path*'],
 };
 // tells Next.js which URLs this middleware should run on
 // without this, middleware would run on EVERY request including images, CSS etc

@@ -998,7 +998,7 @@ const page = () => {
 
                                 {myChats.map((chat) => {
                                     // console.log(chat.sender);
-                                    console.log(chat);
+                                    // console.log(chat);
                                     let date = ""
                                     // console.log(chat);
 

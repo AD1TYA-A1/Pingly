@@ -14,7 +14,7 @@ export async function POST(req) {
     const otpRecord = await db.collection("otp").findOne({ email: body.email, otp: otp });
     // console.log(user);
 
-    console.log(otpRecord);
+    // console.log(otpRecord);
     
 
     if (!otpRecord) {

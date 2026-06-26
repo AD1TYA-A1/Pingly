@@ -5,10 +5,13 @@ import { useRouter } from "next/navigation";
 
 function Message({ msg }) {
   const isUser = msg.role === "user";
+  const time = yourTimeStap(msg.time)
+  // console.log(time);
+
 
   return (
     <div className={`flex gap-2.5 items-end ${isUser ? "flex-row-reverse" : ""}`}>
-      {isUser ? <UserAvatar /> : <BotAvatar />}
+      {isUser ? "👤" : "🤖"}
 
       <div className={`flex flex-col gap-1 max-w-[72%] ${isUser ? "items-end" : "items-start"}`}>
         <div
@@ -17,19 +20,91 @@ function Message({ msg }) {
             : "bg-zinc-900 text-zinc-300 border border-zinc-800 rounded-2xl rounded-bl-[4px]"
             }`}
         >
-          {msg.text}
+          {msg.content}
         </div>
 
         <div className={`flex items-center gap-1.5 text-[11px] text-zinc-600 px-0.5 ${isUser ? "flex-row-reverse" : ""}`}>
-          <span>{msg.time}</span>
-          {isUser && <StatusIcon status={msg.status} />}
+          <span>{time.hour}:{time.minutes} {time.meridiem}</span>
+          {/* {isUser && <StatusIcon status={msg.status} />} */}
         </div>
       </div>
     </div>
   );
 }
 
+function yourTimeStap(timeStamp) {
+  // console.log(timeStamp);
+  // 2026-06-14T07:35:32.060Z
+
+  let date = timeStamp.split("T")[0]  // 2026-06-04
+  let time = timeStamp.split("T")[1].slice(0, 5) // 07:33
+
+  let hour = parseInt(time.split(":")[0])
+  // console.log(hour);
+  let minutes = parseInt(time.split(":")[1])
+  hour = hour + 5;
+  minutes = minutes + 30
+  if (minutes > 60) {
+    minutes = minutes - 60
+    hour = hour + 1
+  }
+
+  if (minutes < 10) {
+    minutes = minutes.toString()
+    minutes = "0" + minutes
+  }
+
+  // console.log(hour, ":", minutes);
+  if (hour < 12) {
+    // console.log(hour);
+    // console.log(hour);
+
+    if (hour < 10) {
+
+      hour = hour.toString()
+      hour = "0" + hour
+      console.log("HOUR!=10 || HOUT!=11");
+      console.log(hour);
+
+    }
+    const timePayload = {
+      hour,
+      minutes,
+      meridiem: "AM"
+    }
+    return timePayload
+  } else if (hour > 12) {
+    hour = hour - 12
+    // console.log(hour);
+
+    if (hour < 10) {
+
+      hour = hour.toString()
+      hour = "0" + hour
+      // console.log("HOUR!=10 || HOUT!=11");
+      // console.log(hour);
+
+    }
+    const timePayload = {
+      hour,
+      minutes,
+      meridiem: "PM"
+    }
+    return timePayload
+  } else {
+    const timePayload = {
+      hour,
+      minutes,
+      meridiem: "PM"
+    }
+    return timePayload
+
+  }
+
+}
+
 export default function AIAssistProfessional() {
+
 
 
   // Replace this with your actual DB fetch for the avatar URL
@@ -37,27 +112,207 @@ export default function AIAssistProfessional() {
   const [avatarUrl, setAvatarUrl] = useState("")
   const router = useRouter()
   const [startChat, setStartChat] = useState(true)
+  const [messageForApex, setMessagesForApex] = useState([])
   const [messages, setMessages] = useState([])
 
+  const [inputVal, setInputVal] = useState('');
+  const textareaRef = useRef(null);
+  const bottomRef = useRef()
+  const [lastRecentChatID, setLastRecentChatID] = useState("")
 
+
+
+  // Handles auto-resizing logic
+  const autoResize = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      // 1. Reset height to 'auto' so it can shrink if text is deleted
+      textarea.style.height = 'auto';
+      // 2. Set height to scrollHeight to expand it, capped by Tailwind's max-h-28
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  };
+
+  const handleInputChange = (e) => {
+    setInputVal(e.target.value);
+    autoResize();
+  };
+
+  async function saveToDB(role, message) {
+    const axios = require('axios');
+    let data = JSON.stringify({
+      "role": role,
+      "message": message
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: '/api/ApexAI/initiateMessage',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data
+    };
+
+    axios.request(config)
+      .then((response) => {
+        console.log((response.data));
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+  }
+
+
+  const handleSend = async () => {
+    if (!inputVal.trim()) return;
+    const msgPayload = {
+      content: inputVal.trim(),
+      role: "user", // or BOT
+      time: new Date().toISOString(),
+      // userID,
+    }
+    // console.log(msgPayload);
+
+
+    const { time, ...msgPayloadToApex } = msgPayload //Removing time Because groq only takes content and role
+
+
+
+    await saveToDB("user", inputVal.trim())
+
+
+
+    // const msgPayloadForDB = {
+    //   content: inputVal.trim(),
+    //   role: "user", // or BOT
+    //   time: Date.now(),
+    //   // userID,
+    // }
+    console.log("Message sent:", inputVal); // Replace with your submit logic
+    // Clear input and reset height
+    setInputVal('');
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+    }
+
+    await getResponceFromAPEX(inputVal.trim(), messageForApex)
+    setMessages(prev => [...prev, msgPayload]);  // user message
+    setMessagesForApex([...messageForApex, msgPayloadToApex])
+
+    // console.log(responce);
+
+    // autoScrollMainRef.current
+    // bottomRef.current.scrollHeight = 0
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });    // console.log(bottomRef.current.scrollHeight);
+
+  };
+
+  async function getResponceFromAPEX(userMessage, oldChats) {
+    let data = JSON.stringify({
+      "userMessage": userMessage,
+      "oldChats": oldChats
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: '/api/ApexAI/aiResponse',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data
+    };
+
+    axios.request(config)
+      .then((response) => {
+        // console.log((response.data));
+        saveToDB("bot", response.data.result)
+        const msgPayload = {
+          content: response.data.result,
+          role: "assistant",
+          time: new Date().toISOString()
+        }
+        setMessages(prev => [...prev, msgPayload]);  // user message
+        bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+
+  }
+
+  // APIcalls()
+
+
+  // Allow sending with 'Enter' (but allow new lines with 'Shift + Enter')
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault(); // Prevents adding a new line
+      handleSend();
+    }
+  };
+
+  // Add this useEffect in your AIAssistProfessional component
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]); // fires every time messages state updates
 
   useEffect(() => {
     axios.get("/api/auth/me")
       .then((res) => {
         setuserName(res.data.userName)
         setAvatarUrl(res.data.avatarUrl)
+        // setuserID(res.data._id)
+        // console.log(res.data);
+        let data = JSON.stringify({
+          "lastId": lastRecentChatID,
+        });
+
+        let config = {
+          method: 'post',
+          maxBodyLength: Infinity,
+          url: '/api/ApexAI/fetchMessage',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          data
+        };
+
+        axios.request(config)
+          .then((response) => {
+            console.log((response.data));
+            setLastRecentChatID(response.data.last_id)
+            setMessages(response.data.chats.reverse())
+            let chats = response.data.chats.map((chat) => ({
+              content: chat.content,
+              role: chat.role
+            }))
+            console.log(chats);
+
+            setMessagesForApex([...messageForApex,chats])
+
+
+          })
+          .catch((error) => {
+            console.log(error);
+          });
+
       })
       .catch((error) => {
         console.error(error);
       });
+
+
   }, [])
 
 
 
 
-  function getTime() {
-    return new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  }
 
 
 
@@ -152,7 +407,7 @@ export default function AIAssistProfessional() {
               />
               <button
                 onClick={() => { setStartChat(true) }}
-                 className=" cursor-pointer flex-shrink-0 w-9 h-9 rounded-[10px] bg-amber-500 hover:bg-amber-400 active:scale-95 flex items-center justify-center transition-all duration-150">
+                className=" cursor-pointer flex-shrink-0 w-9 h-9 rounded-[10px] bg-amber-500 hover:bg-amber-400 active:scale-95 flex items-center justify-center transition-all duration-150">
 
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
                   stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -175,7 +430,7 @@ export default function AIAssistProfessional() {
                 {/* <RobotIcon size={20} /> */}
               </div>
               <div>
-                <p className="text-sm font-medium text-zinc-100 leading-tight">VAI · Professional</p>
+                <p className="text-sm font-medium text-zinc-100 leading-tight">APEX · Professional</p>
                 <p className="text-[11px] text-zinc-500 mt-0.5">Always online</p>
               </div>
             </div>
@@ -186,41 +441,69 @@ export default function AIAssistProfessional() {
           </header>
 
           {/* ── Messages ── */}
-          <main className="  px-3 py-2 flex-1 flex-col gap-3.5 scrollbar-thin scrollbar-thumb-zinc-800">
+          <main
+            // ref={bottomRef}
+            className="
+            [&::-webkit-scrollbar]:w-1.5
+  [&::-webkit-scrollbar-track]:bg-transparent
+  [&::-webkit-scrollbar-thumb]:bg-zinc-800
+  [&::-webkit-scrollbar-thumb]:rounded-full
+  hover:[&::-webkit-scrollbar-thumb]:bg-zinc-700
+  [scrollbar-width:thin]
+  [scrollbar-color:#27272a_transparent]
+            px-3 pb-10 flex-1 flex-col  scrollbar-thin scrollbar-thumb-zinc-800 overflow-y-auto">
 
             {/* Date separator */}
-            <div className="flex items-center gap-3 ">
+            <div className={` flex items-center gap-3 ${messages.length == 0 ? "mt-5 text-[18px]" : "text-[11px] mt-3 mb-2 "} `}>
               <div className="flex-1 h-px bg-zinc-900" />
-              <span className="text-[11px] text-zinc-600 ">Today</span>
+              <span className=" text-zinc-600 ">Chats Dissapear After 24Hrs</span>
               <div className="flex-1 h-px bg-zinc-900" />
             </div>
 
             {messages.map((msg) => (
-              <Message key={msg.id} msg={msg} />
+              <Message key={msg.time} msg={msg} />
             ))}
 
 
-            {/* <div ref={bottomRef} /> */}
+            <div ref={bottomRef} className="h-10 w-full flex-shrink-0" />
           </main>
 
+
           {/* ── Input Bar ── */}
-          <footer className="px-4 py-3 bg-[#111111] border-t border-zinc-900 flex-shrink-0 ">
-            <div className="flex items-end gap-2 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-2.5 focus-within:border-amber-400/40 transition-colors duration-200 ">
+          <footer className="px-4 py-3 bg-[#111111] border-t border-zinc-900 flex-shrink-0">
+            {/* Input Container */}
+            <div className="flex items-end gap-2 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-2.5 focus-within:border-amber-400/40 transition-colors duration-200">
+
               <textarea
-                // ref={textareaRef}
+                autoFocus
+                ref={textareaRef}
                 rows={1}
-                // value={inputVal}
-                // onChange={(e) => { setInputVal(e.target.value); autoResize(); }}
-                // onKeyDown={handleKeyDown}
+                value={inputVal}
+                onChange={handleInputChange}
+                onKeyDown={handleKeyDown}
                 placeholder="Send a message..."
-                className="flex-1  bg-transparent border-none outline-none  text-[13.5px]  text-zinc-200 placeholder-zinc-600 leading-relaxed max-h-28 w-auto "
+                style={{ resize: 'none' }} // Prevents the user from manually dragging the corner
+                className="flex-1 bg-transparent border-none outline-none text-[13.5px] text-zinc-200 placeholder-zinc-600 leading-relaxed max-h-28 overflow-y-auto"
               />
+
+              {/* Send Button */}
+              <button
+                onClick={handleSend}
+                disabled={!inputVal.trim()}
+                aria-label="Send message"
+                className="mb-0.5 p-1.5 rounded-xl bg-amber-400 text-zinc-950 hover:bg-amber-300 disabled:opacity-30 disabled:bg-zinc-700 disabled:text-zinc-500 transition-all shrink-0"
+              >
+                {/* Paper airplane SVG icon */}
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                  <path d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z" />
+                </svg>
+              </button>
             </div>
+
             <p className="text-center text-[10.5px] text-zinc-700 mt-2">
               Professional Mode · Formal · Goal-Oriented · Structured
             </p>
           </footer>
-
         </div>
       )}
 
