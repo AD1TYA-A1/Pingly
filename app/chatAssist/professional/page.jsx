@@ -124,6 +124,7 @@ export default function AIAssistProfessional() {
 
   const [allLoadingDone, setAllLoadingDone] = useState(false)
 
+  const [gettingResponceFromApex, setGettingResponceFromApex] = useState(false)
 
   // Handles auto-resizing logic
   const autoResize = () => {
@@ -214,6 +215,8 @@ export default function AIAssistProfessional() {
   };
 
   async function getResponceFromAPEX(userMessage, oldChats) {
+    setGettingResponceFromApex(true)
+
     let data = JSON.stringify({
       "userMessage": userMessage,
       "oldChats": oldChats
@@ -240,8 +243,10 @@ export default function AIAssistProfessional() {
         }
         setMessages(prev => [...prev, msgPayload]);  // user message
         bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        setGettingResponceFromApex(false)
       })
       .catch((error) => {
+        setGettingResponceFromApex(false)
         console.log(error);
       });
 
@@ -330,7 +335,7 @@ export default function AIAssistProfessional() {
               console.log(chats);
               setMessagesForApex([...messageForApex, chats])
             }
-            
+
             setAllLoadingDone(true)
 
           })
@@ -601,7 +606,15 @@ export default function AIAssistProfessional() {
                       {messages.map((msg) => (
                         <Message key={msg.time} msg={msg} />
                       ))}
-
+                      {gettingResponceFromApex && (<div className="flex items-end gap-2">
+                        <div className="w-7 h-7 rounded-full bg-amber-500 shrink-0" />
+                        <div className="bg-[#1a1a1a] rounded-2xl rounded-bl-none px-4 py-3 flex items-center gap-1.5">
+                          <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce [animation-delay:0ms]" />
+                          <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce [animation-delay:150ms]" />
+                          <span className="w-2 h-2 bg-zinc-400 rounded-full animate-bounce [animation-delay:300ms]" />
+                        </div>
+                      </div>
+                      )}
 
                       <div ref={bottomRef} className="h-10 w-full flex-shrink-0" />
                     </main>

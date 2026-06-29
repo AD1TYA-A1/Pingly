@@ -76,7 +76,7 @@ export default function AiAssistantOptions({ onClose }) {
                     {/* Casual Mode */}
                     <div
                         onClick={() => {
-                            console.log("Routing to Casual Route");
+                            router.push("/chatAssist/casual")
                         }}
                         className="group relative bg-[#0a0a0f] border border-[#1e2a3a] hover:border-sky-500/60 rounded-xl p-5 flex flex-col gap-3 cursor-pointer transition-all duration-300 hover:shadow-[0_0_24px_rgba(56,189,248,0.08)] overflow-hidden"
                     >
