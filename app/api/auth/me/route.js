@@ -11,8 +11,8 @@ export async function GET() {
         if (!token) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
-        console.log("JWT_SECRET:", process.env.JWT_SECRET);
-        console.log("token:", token);
+        // console.log("JWT_SECRET:", process.env.JWT_SECRET);
+        // console.log("token:", token);
         const client = await clientPromise;
         const db = await client.db("adminChat")
         // console.log(decoded);

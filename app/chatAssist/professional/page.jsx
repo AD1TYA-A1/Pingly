@@ -111,7 +111,7 @@ export default function AIAssistProfessional() {
   const [userName, setuserName] = useState("")
   const [avatarUrl, setAvatarUrl] = useState("")
   const router = useRouter()
-  const [startChat, setStartChat] = useState(true)
+  const [startChat, setStartChat] = useState(false)
   const [messageForApex, setMessagesForApex] = useState([])
   const [messages, setMessages] = useState([])
 
@@ -119,7 +119,10 @@ export default function AIAssistProfessional() {
   const textareaRef = useRef(null);
   const bottomRef = useRef()
   const [lastRecentChatID, setLastRecentChatID] = useState("")
+  const [openDeleteModal, setOpenDeleteModal] = useState(false)
+  const [deletingChat, setDeletingChat] = useState(false)
 
+  const [allLoadingDone, setAllLoadingDone] = useState(false)
 
 
   // Handles auto-resizing logic
@@ -247,9 +250,38 @@ export default function AIAssistProfessional() {
   // APIcalls()
 
 
+
+  async function deleteChats() {
+
+    setDeletingChat(true)
+    try {
+      const response = await axios.request({
+        method: 'delete',
+        maxBodyLength: Infinity,
+        url: '/api/ApexAI/clearHistory',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      console.log(response.data)
+      setDeletingChat(false)
+      setOpenDeleteModal(false)
+      setStartChat(false)
+      setMessages([])
+      setMessagesForApex([])
+      router.push("/chatAssist/professional")
+
+    } catch (error) {
+      console.log(error)
+      setDeletingChat(false)
+    }
+  }
+
   // Allow sending with 'Enter' (but allow new lines with 'Shift + Enter')
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
+      if (!startChat) {
+        setStartChat(true)
+      }
       e.preventDefault(); // Prevents adding a new line
       handleSend();
     }
@@ -285,17 +317,21 @@ export default function AIAssistProfessional() {
 
         axios.request(config)
           .then((response) => {
-            console.log((response.data));
-            setLastRecentChatID(response.data.last_id)
-            setMessages(response.data.chats.reverse())
-            let chats = response.data.chats.map((chat) => ({
-              content: chat.content,
-              role: chat.role
-            }))
-            console.log(chats);
-
-            setMessagesForApex([...messageForApex,chats])
-
+            // console.log((response.data));
+            if (response.data.success) {
+              // console.log("TRUEE MESSAGES FOUND");
+              setStartChat(true)
+              setLastRecentChatID(response.data.last_id)
+              setMessages(response.data.chats.reverse())
+              let chats = response.data.chats.map((chat) => ({
+                content: chat.content,
+                role: chat.role
+              }))
+              console.log(chats);
+              setMessagesForApex([...messageForApex, chats])
+            }
+            
+            setAllLoadingDone(true)
 
           })
           .catch((error) => {
@@ -317,196 +353,358 @@ export default function AIAssistProfessional() {
 
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex flex-col font-sans">
+    <>
 
-      {/* ── NAVBAR ── */}
-      <nav className="sticky top-0 z-10 flex items-center justify-between px-6 h-[60px] bg-zinc-950 border-b border-zinc-800">
 
-        {/* Logo */}
-        <div className="flex items-center gap-2.5">
-          <div className="w-[34px] h-[34px] bg-amber-500 rounded-[9px] flex items-center justify-center flex-shrink-0">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
-              stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-            </svg>
-          </div>
-          <span className="text-[15px] font-semibold text-zinc-50 tracking-tight">
-            Admin<span className="text-amber-500">Chats</span>
-          </span>
-        </div>
 
-        {/* Right side */}
-        <div className="flex items-center gap-3">
-          <span className="text-[11px] font-semibold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
-            Professional
-          </span>
+      <div className="min-h-screen bg-zinc-950 flex flex-col font-sans">
 
-          {/* Profile pill */}
-          <div onClick={() => {
-            router.push("/profile")
-          }} className=" flex items-center gap-2 pl-[5px] pr-3 py-[5px] rounded-full border border-zinc-800 bg-zinc-900 cursor-pointer group hover:border-amber-500/60 hover:bg-amber-500/5 transition-all duration-200">
-            {avatarUrl ? (
-              <img
-                src={avatarUrl}
-                alt="Avatar"
-                className="w-7 h-7 rounded-full object-cover border border-zinc-700 group-hover:border-amber-500/60 transition-all duration-200"
-              />
-            ) : (
-              /* Fallback initials circle if no avatar */
-              <div className="w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center text-[11px] font-bold text-black border border-amber-400">
-                {userName?.charAt(0).toUpperCase()}
-              </div>
-            )}
-            <span className="text-[13px] font-medium text-zinc-400 group-hover:text-zinc-100 transition-colors duration-200">
-              {userName}
-            </span>
-          </div>
-        </div>
-      </nav>
+        {/* ── NAVBAR ── */}
+        <nav className="sticky top-0 z-10 flex items-center justify-between px-6 h-[60px] bg-zinc-950 border-b border-zinc-800">
 
-      {/* ── MAIN EMPTY STATE ── */}
-      {!startChat ? (
-        <main className="flex-1 flex flex-col items-center justify-center px-6 pb-10">
-
-          {/* Icon + heading */}
-          <div className="flex flex-col items-center gap-4 mb-10">
-            <div className="w-14 h-14 rounded-[18px] bg-amber-500/8 border border-amber-500/18 flex items-center justify-center">
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
-                stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <path d="M12 8v4l3 3" />
+          {/* Logo */}
+          <div
+            onClick={() => { router.push("/chat") }}
+            className="flex items-center gap-2.5 cursor-pointer">
+            <div className="w-[34px] h-[34px] bg-amber-500 rounded-[9px] flex items-center justify-center flex-shrink-0">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+                stroke="white" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
               </svg>
             </div>
-            <div className="text-[22px] md:text-6xl  font-semibold text-zinc-50 tracking-tight text-center">
-              How can I help you today?
-            </div>
-            <p className="text-sm text-zinc-500 text-center max-w-[300px] leading-relaxed">
-              Send a message to get started with your professional AI assistant.
-            </p>
+            <span className="text-[15px] font-semibold text-zinc-50 tracking-tight">
+              Admin<span className="text-amber-500">Chats</span>
+            </span>
           </div>
 
-          {/* Suggestion chips
-          <div className="flex flex-wrap gap-2 justify-center max-w-[480px] mb-9">
-            {["Draft a report", "Summarize this document", "Write an email", "Analyze data", "Brainstorm ideas", "Debug my code"].map((chip) => (
-              <button
-                key={chip}
-                className="text-[12.5px] text-zinc-400 border border-zinc-800 rounded-full px-3.5 py-1.5 bg-zinc-900 hover:border-amber-500/40 hover:text-amber-400 hover:bg-amber-500/5 transition-all duration-150 whitespace-nowrap"
-              >
-                {chip}
-              </button>
-            ))}
-          </div> */}
-
-          {/* Input bar */}
-          <div className="w-full max-w-[560px]">
-            <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-700 rounded-2xl px-[18px] py-3 focus-within:border-amber-500/50 transition-colors duration-200">
-              <input
-                type="text"
-                placeholder="Send a message to get started..."
-                className="flex-1 bg-transparent border-none outline-none text-sm text-zinc-100 placeholder-zinc-600"
-              />
-              <button
-                onClick={() => { setStartChat(true) }}
-                className=" cursor-pointer flex-shrink-0 w-9 h-9 rounded-[10px] bg-amber-500 hover:bg-amber-400 active:scale-95 flex items-center justify-center transition-all duration-150">
-
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
-                  stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" />
-                </svg>
-              </button>
-            </div>
-            <p className="text-center text-[11.5px] text-zinc-700 mt-2.5">
-              Professional Mode · Formal · Goal-Oriented · Structured
-            </p>
-          </div>
-        </main>
-      ) : (
-        <div className="flex flex-col h-[90vh] bg-black text-white font-sans">
-
-          {/* ── Header ── */}
-          <header className="flex items-center justify-between px-5 py-3.5 bg-[#111111] border-b border-zinc-900 flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-[10px] bg-amber-400 flex items-center justify-center text-black">
-                {/* <RobotIcon size={20} /> */}
-              </div>
-              <div>
-                <p className="text-sm font-medium text-zinc-100 leading-tight">APEX · Professional</p>
-                <p className="text-[11px] text-zinc-500 mt-0.5">Always online</p>
-              </div>
-            </div>
-
-            <span className="text-[10px] font-medium tracking-widest uppercase text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-md px-2.5 py-1">
+          {/* Right side */}
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-full">
               Professional
             </span>
-          </header>
 
-          {/* ── Messages ── */}
-          <main
-            // ref={bottomRef}
-            className="
-            [&::-webkit-scrollbar]:w-1.5
-  [&::-webkit-scrollbar-track]:bg-transparent
-  [&::-webkit-scrollbar-thumb]:bg-zinc-800
-  [&::-webkit-scrollbar-thumb]:rounded-full
-  hover:[&::-webkit-scrollbar-thumb]:bg-zinc-700
-  [scrollbar-width:thin]
-  [scrollbar-color:#27272a_transparent]
-            px-3 pb-10 flex-1 flex-col  scrollbar-thin scrollbar-thumb-zinc-800 overflow-y-auto">
+            {/* Profile pill */}
+            <div onClick={() => {
+              router.push("/profile")
+            }} className=" flex items-center gap-2 pl-[5px] pr-3 py-[5px] rounded-full border border-zinc-800 bg-zinc-900 cursor-pointer group hover:border-amber-500/60 hover:bg-amber-500/5 transition-all duration-200">
+              {avatarUrl ? (
+                <img
+                  src={avatarUrl}
+                  alt="Avatar"
+                  className="w-7 h-7 rounded-full object-cover border border-zinc-700 group-hover:border-amber-500/60 transition-all duration-200"
+                />
+              ) : (
+                /* Fallback initials circle if no avatar */
+                <div className="w-7 h-7 rounded-full bg-amber-500 flex items-center justify-center text-[11px] font-bold text-black border border-amber-400">
+                  {userName?.charAt(0).toUpperCase()}
+                </div>
+              )}
+              <span className="text-[13px] font-medium text-zinc-400 group-hover:text-zinc-100 transition-colors duration-200">
+                {userName}
+              </span>
+            </div>
+          </div>
+        </nav>
+        {!allLoadingDone && <div className="bg-[#0a0a0a] rounded-xl overflow-hidden">
 
-            {/* Date separator */}
-            <div className={` flex items-center gap-3 ${messages.length == 0 ? "mt-5 text-[18px]" : "text-[11px] mt-3 mb-2 "} `}>
-              <div className="flex-1 h-px bg-zinc-900" />
-              <span className=" text-zinc-600 ">Chats Dissapear After 24Hrs</span>
-              <div className="flex-1 h-px bg-zinc-900" />
+          {/* Top nav */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#1f1f1f]">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#2a2a2a] animate-pulse" />
+              <div className="w-24 h-3 bg-[#2a2a2a] rounded animate-pulse" />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-20 h-7 bg-[#2a2a2a] rounded-full animate-pulse" />
+              <div className="w-8 h-8 rounded-full bg-[#2a2a2a] animate-pulse" />
+            </div>
+          </div>
+
+          {/* APEX sub-header */}
+          <div className="flex items-center justify-between px-5 py-3 border-b border-[#1a1a1a]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[#2a2a2a] animate-pulse" />
+              <div className="flex flex-col gap-1.5">
+                <div className="w-28 h-3 bg-[#2a2a2a] rounded animate-pulse" />
+                <div className="w-16 h-2 bg-[#2a2a2a] rounded animate-pulse opacity-50" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <div className="w-24 h-8 bg-[#2a2a2a] rounded animate-pulse" />
+              <div className="w-24 h-8 bg-[#2a2a2a] rounded animate-pulse" />
+            </div>
+          </div>
+
+          {/* Date banner */}
+          <div className="flex justify-center py-3">
+            <div className="w-36 h-2 bg-[#2a2a2a] rounded animate-pulse opacity-40" />
+          </div>
+
+          {/* Chat bubbles */}
+          <div className="flex flex-col gap-5 px-5 pb-6">
+
+            {/* AI — left */}
+            <div className="flex items-end gap-2">
+              <div className="w-7 h-7 rounded-full bg-[#2a2a2a] animate-pulse shrink-0" />
+              <div className="flex flex-col gap-1">
+                <div className="w-52 h-10 bg-[#2a2a2a] rounded-2xl rounded-bl-none animate-pulse" />
+                <div className="w-9 h-2 bg-[#2a2a2a] rounded animate-pulse opacity-40 ml-1" />
+              </div>
             </div>
 
-            {messages.map((msg) => (
-              <Message key={msg.time} msg={msg} />
-            ))}
-
-
-            <div ref={bottomRef} className="h-10 w-full flex-shrink-0" />
-          </main>
-
-
-          {/* ── Input Bar ── */}
-          <footer className="px-4 py-3 bg-[#111111] border-t border-zinc-900 flex-shrink-0">
-            {/* Input Container */}
-            <div className="flex items-end gap-2 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-2.5 focus-within:border-amber-400/40 transition-colors duration-200">
-
-              <textarea
-                autoFocus
-                ref={textareaRef}
-                rows={1}
-                value={inputVal}
-                onChange={handleInputChange}
-                onKeyDown={handleKeyDown}
-                placeholder="Send a message..."
-                style={{ resize: 'none' }} // Prevents the user from manually dragging the corner
-                className="flex-1 bg-transparent border-none outline-none text-[13.5px] text-zinc-200 placeholder-zinc-600 leading-relaxed max-h-28 overflow-y-auto"
-              />
-
-              {/* Send Button */}
-              <button
-                onClick={handleSend}
-                disabled={!inputVal.trim()}
-                aria-label="Send message"
-                className="mb-0.5 p-1.5 rounded-xl bg-amber-400 text-zinc-950 hover:bg-amber-300 disabled:opacity-30 disabled:bg-zinc-700 disabled:text-zinc-500 transition-all shrink-0"
-              >
-                {/* Paper airplane SVG icon */}
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                  <path d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z" />
-                </svg>
-              </button>
+            {/* User — right */}
+            <div className="flex flex-col items-end gap-1">
+              <div className="w-20 h-9 bg-[#2a2a2a] rounded-2xl rounded-br-none animate-pulse" />
+              <div className="w-9 h-2 bg-[#2a2a2a] rounded animate-pulse opacity-40 mr-1" />
             </div>
 
-            <p className="text-center text-[10.5px] text-zinc-700 mt-2">
-              Professional Mode · Formal · Goal-Oriented · Structured
-            </p>
-          </footer>
+            {/* AI — left longer */}
+            <div className="flex items-end gap-2">
+              <div className="w-7 h-7 rounded-full bg-[#2a2a2a] animate-pulse shrink-0" />
+              <div className="flex flex-col gap-1">
+                <div className="w-72 h-14 bg-[#2a2a2a] rounded-2xl rounded-bl-none animate-pulse" />
+                <div className="w-9 h-2 bg-[#2a2a2a] rounded animate-pulse opacity-40 ml-1" />
+              </div>
+            </div>
+
+            {/* User — right */}
+            <div className="flex flex-col items-end gap-1">
+              <div className="w-32 h-9 bg-[#2a2a2a] rounded-2xl rounded-br-none animate-pulse" />
+              <div className="w-9 h-2 bg-[#2a2a2a] rounded animate-pulse opacity-40 mr-1" />
+            </div>
+
+          </div>
+
+          {/* Input bar */}
+          <div className="px-4 py-3 border-t border-[#1a1a1a]">
+            <div className="w-full h-12 bg-[#2a2a2a] rounded-full animate-pulse opacity-60" />
+          </div>
+
         </div>
-      )}
+        }
+        {
+          !openDeleteModal ? (
+            <>
+              {/* ── MAIN EMPTY STATE ── */}
+              {
 
-    </div>
+                !startChat ? (
+                  <main className="flex-1 flex flex-col items-center justify-center px-6 pb-10">
+
+                    {/* Icon + heading */}
+                    <div className="flex flex-col items-center gap-4 mb-10">
+                      <div className="w-14 h-14 rounded-[18px] bg-amber-500/8 border border-amber-500/18 flex items-center justify-center">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none"
+                          stroke="#f59e0b" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" />
+                          <path d="M12 8v4l3 3" />
+                        </svg>
+                      </div>
+                      <div className="text-[22px] md:text-6xl  font-semibold text-zinc-50 tracking-tight text-center">
+                        How can I help you today?
+                      </div>
+                      <p className="text-sm text-zinc-500 text-center max-w-[300px] leading-relaxed">
+                        Send a message to get started with your professional AI assistant.
+                      </p>
+                    </div>
+
+                    {/* Suggestion chips
+            <div className="flex flex-wrap gap-2 justify-center max-w-[480px] mb-9">
+              {["Draft a report", "Summarize this document", "Write an email", "Analyze data", "Brainstorm ideas", "Debug my code"].map((chip) => (
+                <button
+                  key={chip}
+                  className="text-[12.5px] text-zinc-400 border border-zinc-800 rounded-full px-3.5 py-1.5 bg-zinc-900 hover:border-amber-500/40 hover:text-amber-400 hover:bg-amber-500/5 transition-all duration-150 whitespace-nowrap"
+                >
+                  {chip}
+                </button>
+              ))}
+            </div> */}
+
+                    {/* Input bar */}
+                    <div className="w-full max-w-[560px]">
+                      <div className="flex items-center gap-3 bg-zinc-900 border border-zinc-700 rounded-2xl px-[18px] py-3 focus-within:border-amber-500/50 transition-colors duration-200">
+                        <input
+                          type="text"
+                          onChange={(e) => handleInputChange(e)}
+                          onKeyDown={handleKeyDown}
+                          placeholder="Send a message to get started..."
+                          className="flex-1 bg-transparent border-none outline-none text-sm text-zinc-100 placeholder-zinc-600"
+                        />
+                        <button
+                          onClick={() => {
+                            handleSend()
+                            setStartChat(true)
+                          }}
+                          className=" cursor-pointer flex-shrink-0 w-9 h-9 rounded-[10px] bg-amber-500 hover:bg-amber-400 active:scale-95 flex items-center justify-center transition-all duration-150">
+
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="black" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" />
+                          </svg>
+                        </button>
+                      </div>
+                      <p className="text-center text-[11.5px] text-zinc-700 mt-2.5">
+                        Professional Mode · Formal · Goal-Oriented · Structured
+                      </p>
+                    </div>
+                  </main>
+                ) : (
+                  <div className="flex flex-col h-[90vh] bg-black text-white font-sans">
+
+                    {/* ── Header ── */}
+                    <header className="flex items-center justify-between px-5 py-3.5 bg-[#111111] border-b border-zinc-900 flex-shrink-0">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-[10px] bg-amber-400 flex items-center justify-center text-black">
+                          {/* <RobotIcon size={20} /> */}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-zinc-100 leading-tight">APEX · Professional</p>
+                          <p className="text-[11px] text-zinc-500 mt-0.5">Always online</p>
+                        </div>
+                      </div>
+
+                      <div className=" flex items-center justify-center gap-5">
+
+                        <div>
+                          <button
+                            onClick={() => setOpenDeleteModal(true)}
+                            className="border border-red-600 text-red-600 hover:bg-red-600/10 hover:text-red-400 hover:border-red-400 active:scale-95 transition-all text-xs font-semibold tracking-widest rounded-md px-4 py-1.5 cursor-pointer bg-transparent">
+                            DELETE CHAT
+                          </button>
+                        </div>
+                        <span className="text-[10px] font-medium tracking-widest uppercase text-amber-400 bg-amber-400/10 border border-amber-400/20 rounded-md px-2.5 py-1">
+                          Professional
+                        </span>
+                      </div>
+
+                    </header>
+
+                    {/* ── Messages ── */}
+                    <main
+                      // ref={bottomRef}
+                      className="
+              [&::-webkit-scrollbar]:w-1.5
+    [&::-webkit-scrollbar-track]:bg-transparent
+    [&::-webkit-scrollbar-thumb]:bg-zinc-800
+    [&::-webkit-scrollbar-thumb]:rounded-full
+    hover:[&::-webkit-scrollbar-thumb]:bg-zinc-700
+    [scrollbar-width:thin]
+    [scrollbar-color:#27272a_transparent]
+              px-3 pb-10 flex-1 flex-col  scrollbar-thin scrollbar-thumb-zinc-800 overflow-y-auto">
+
+                      {/* Date separator */}
+                      <div className={` flex items-center gap-3 ${messages.length == 0 ? "mt-5 text-[18px]" : "text-[11px] mt-3 mb-2 "} `}>
+                        <div className="flex-1 h-px bg-zinc-900" />
+                        <span className=" text-zinc-600 ">Chats Dissapear After 24Hrs</span>
+                        <div className="flex-1 h-px bg-zinc-900" />
+                      </div>
+
+                      {messages.map((msg) => (
+                        <Message key={msg.time} msg={msg} />
+                      ))}
+
+
+                      <div ref={bottomRef} className="h-10 w-full flex-shrink-0" />
+                    </main>
+
+
+                    {/* ── Input Bar ── */}
+                    <footer className="px-4 py-3 bg-[#111111] border-t border-zinc-900 flex-shrink-0">
+                      {/* Input Container */}
+                      <div className="flex items-end gap-2 bg-zinc-900 border border-zinc-800 rounded-2xl px-4 py-2.5 focus-within:border-amber-400/40 transition-colors duration-200">
+
+                        <textarea
+                          autoFocus
+                          ref={textareaRef}
+                          rows={1}
+                          value={inputVal}
+                          onChange={handleInputChange}
+                          onKeyDown={handleKeyDown}
+                          placeholder="Send a message..."
+                          style={{ resize: 'none' }} // Prevents the user from manually dragging the corner
+                          className="flex-1 bg-transparent border-none outline-none text-[13.5px] text-zinc-200 placeholder-zinc-600 leading-relaxed max-h-28 overflow-y-auto"
+                        />
+
+                        {/* Send Button */}
+                        <button
+                          onClick={handleSend}
+                          disabled={!inputVal.trim()}
+                          aria-label="Send message"
+                          className="mb-0.5 p-1.5 rounded-xl bg-amber-400 text-zinc-950 hover:bg-amber-300 disabled:opacity-30 disabled:bg-zinc-700 disabled:text-zinc-500 transition-all shrink-0"
+                        >
+                          {/* Paper airplane SVG icon */}
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                            <path d="M3.478 2.404a.75.75 0 00-.926.941l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.404z" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      <p className="text-center text-[10.5px] text-zinc-700 mt-2">
+                        Professional Mode · Formal · Goal-Oriented · Structured
+                      </p>
+                    </footer>
+                  </div>
+                )
+              }
+
+            </>
+          ) : (
+            <>
+
+              <>
+                {/* Backdrop */}
+
+                < div className={`fixed inset-0 bg-black/10 backdrop-blur-xs z-40 ${deletingChat}?' cursor-not-allowed opacity-50' `}
+                  onClick={() => {
+                    if (!deletingChat) setOpenDeleteModal(false)  // ✅ only close if NOT deleting
+                  }}
+                />
+
+                {/* Modal */}
+                <div
+                  disabled
+                  className="flex flex-col items-center gap-4 p-6 bg-zinc-900/80 backdrop-blur-md rounded-2xl shadow-xl max-w-sm w-full fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+                  <p className="text-white text-center text-base font-medium">
+                    Are you sure you want to delete this chat?
+                  </p>
+                  <div className="flex gap-3 w-full">
+                    <button
+                      disabled={deletingChat}
+                      onClick={() => setOpenDeleteModal(false)}
+                      className="flex-1 py-2 rounded-xl bg-zinc-700 hover:bg-zinc-600 text-white text-sm font-medium transition-colors
+                    disabled:cursor-not-allowed
+                    "
+                    >
+                      Cancel
+                    </button>
+
+                    {deletingChat ? (<>
+                      <div className="flex flex-col items-center gap-5">
+                        <div className="w-8 h-8 border-4 border-zinc-600 border-t-red-500 rounded-full animate-spin" />
+                        <p className="text-zinc-400 text-sm tracking-wide">Deleting chat...</p>
+                      </div>
+                    </>) : (
+                      <>
+                        <button
+                          onClick={deleteChats}
+                          // disabled:deletingChat
+                          className="flex-1 py-2 cursor-pointer rounded-xl bg-red-600 hover:bg-red-500 text-white text-sm font-medium transition-colors
+                      "
+                        >
+                          Go Ahead
+                        </button>
+                      </>)}
+                  </div>
+                </div>
+
+              </>
+
+            </>
+          )
+        }
+
+
+      </div >
+    </>
+
   );
 }
