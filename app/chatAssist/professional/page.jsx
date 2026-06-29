@@ -2,6 +2,7 @@
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
+import ApexSteelText from "@/app/components/ApexLogo/logo";
 
 function Message({ msg }) {
   const isUser = msg.role === "user";
@@ -558,9 +559,8 @@ export default function AIAssistProfessional() {
                     {/* ── Header ── */}
                     <header className="flex items-center justify-between px-5 py-3.5 bg-[#111111] border-b border-zinc-900 flex-shrink-0">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-[10px] bg-amber-400 flex items-center justify-center text-black">
-                          {/* <RobotIcon size={20} /> */}
-                        </div>
+
+                        <ApexSteelText width="20%" />
                         <div>
                           <p className="text-sm font-medium text-zinc-100 leading-tight">APEX · Professional</p>
                           <p className="text-[11px] text-zinc-500 mt-0.5">Always online</p>
