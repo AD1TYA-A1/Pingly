@@ -14,6 +14,7 @@ export default function SignUp() {
   const [loggingIn, setLoggingIn] = useState(false)
   const [resetPassword, setResetPassword] = useState(true)
   const [resetPasswordFlag, setResetPasswordFlag] = useState(false)
+  const [routerToSignUp, setRouterToSignUp] = useState(false)
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   //Contains BG effect 
@@ -250,12 +251,19 @@ export default function SignUp() {
 
             <p className="text-center text-xs text-white/30 flex justify-center items-center gap-2">
               New to the Arsenal? {" "}
-              <span
-                onClick={() => router.push("/signUp")}
-                className="text-amber-400 cursor-pointer hover:text-amber-300 transition-colors font-medium"
+              <button
+                disabled={routerToSignUp}
+                onClick={() => {
+                  setRouterToSignUp(true)
+                  router.push("/signUp")
+                }}
+                className="
+                 disabled:opacity-65
+                 disabled:text-amber-500
+                text-amber-400 cursor-pointer hover:text-amber-300 transition-colors font-medium"
               >
                 Sign Up →
-              </span>
+              </button>
             </p>
           </div>
         </div>

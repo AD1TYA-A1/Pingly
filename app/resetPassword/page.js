@@ -18,7 +18,7 @@ export default function ResetPassword() {
     const [newPassword, setNewPassword] = useState("")
     const [confirmPassword, setConfirmPassword] = useState("")
     const [handlingResetPassword, setHandlingResetPassword] = useState(false)
-    
+    const [routeToLogInFlag, setRouteToLogInFlag] = useState(false)
 
 
     const handleSendOtp = () => {
@@ -345,11 +345,19 @@ export default function ResetPassword() {
                                 </div>
 
                                 {/* Back link */}
-                                <p className="text-white/25 text-xs">
+                                <p className="text-white/25 text-xs flex items-center justify-center flex-col">
                                     Remembered it?{" "}
-                                    <Link href="/logIn" className="text-yellow-400 font-bold hover:text-yellow-300 transition-colors">
+                                    <button
+                                        disabled={routeToLogInFlag}
+                                        onClick={() => {
+                                            setRouteToLogInFlag(true)
+                                            router.push("/logIn")
+                                        }} className="
+                                        cursor-pointer
+                                         disabled:opacity-60
+text-yellow-400 font-bold hover:text-yellow-300 transition-colors">
                                         Back to Login →
-                                    </Link>
+                                    </button>
                                 </p>
                             </>
                         ) : (
