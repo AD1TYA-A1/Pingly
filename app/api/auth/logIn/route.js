@@ -18,7 +18,7 @@ export async function POST(req) {
         const token = jwt.sign(
             { userId: credentials._id, email: credentials.email },
             process.env.JWT_SECRET,
-            { expiresIn: '100d' } // stays valid for 7 days
+            { expiresIn: '3650d' }              // stays valid for 100 days
         );
 
         // ✅ Save token in cookie

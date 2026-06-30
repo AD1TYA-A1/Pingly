@@ -203,6 +203,8 @@ export default function AIAssistProfessional() {
       textareaRef.current.style.height = 'auto';
     }
 
+    // console.log(messageForApex);
+
     await getResponceFromAPEX(inputVal.trim(), messageForApex)
     setMessages(prev => [...prev, msgPayload]);  // user message
     setMessagesForApex([...messageForApex, msgPayloadToApex])
@@ -236,7 +238,7 @@ export default function AIAssistProfessional() {
     axios.request(config)
       .then((response) => {
         // console.log((response.data));
-        saveToDB("bot", response.data.result)
+        saveToDB("assistant", response.data.result)
         const msgPayload = {
           content: response.data.result,
           role: "assistant",
@@ -332,7 +334,7 @@ export default function AIAssistProfessional() {
               let chats = response.data.chats.map((chat) => ({
                 content: chat.content,
                 role: chat.role
-              }))
+              })).toObject()
               console.log(chats);
               setMessagesForApex([...messageForApex, chats])
             }
@@ -341,11 +343,16 @@ export default function AIAssistProfessional() {
 
           })
           .catch((error) => {
+            setAllLoadingDone(true)
             console.log(error);
           });
 
       })
       .catch((error) => {
+        const status = error.response?.status;
+        if (status === 401)
+          router.push("/logIn");
+
         console.error(error);
       });
 
@@ -494,7 +501,7 @@ export default function AIAssistProfessional() {
               {
 
                 !startChat ? (
-                  <main className="flex-1 flex flex-col items-center justify-center px-6 pb-10">
+                  <main className={`flex-1 flex flex-col ${!allLoadingDone && "hidden"} items-center justify-center px-6 pb-10`}>
 
                     {/* Icon + heading */}
                     <div className="flex flex-col items-center gap-4 mb-10">

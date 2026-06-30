@@ -7,8 +7,16 @@ export async function GET() {
     try {
         const cookieStore = await cookies();
         const token = cookieStore.get('token')?.value;
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (!token) {
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET);
+        } catch (jwtError) {
+            cookies().delete("token");
+            if (jwtError.name === "TokenExpiredError") {
+                return NextResponse.json({ message: "Token expired" }, { status: 401 });
+            }
+            return NextResponse.json({ message: "Invalid token" }, { status: 401 });
+        } if (!token) {
             return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
         }
         // console.log("JWT_SECRET:", process.env.JWT_SECRET);
@@ -27,8 +35,7 @@ export async function GET() {
         }
         return NextResponse.json(user)
     } catch (error) {
-        // console.log(error.message);
-
+        console.log(error.message);
         return NextResponse.json({ message: error.message }, { status: 500 })
     }
 

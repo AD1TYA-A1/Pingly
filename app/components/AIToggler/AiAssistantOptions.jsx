@@ -63,7 +63,7 @@ export default function AiAssistantOptions({ onClose }) {
                         </div>
 
                         <div className="px-2 py-1 bg-[#1c1107] border border-amber-900 rounded-md w-fit">
-                            <span className="text-amber-600 text-[11px]">VAI — Advanced Reporting Bot</span>
+                            <span className="text-amber-600 text-[11px]">APEX — Advanced Reporting Bot</span>
                         </div>
 
                         <button

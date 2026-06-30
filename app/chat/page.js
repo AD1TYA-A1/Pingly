@@ -136,6 +136,7 @@ const page = () => {
         // console.log(response.data.conversations.length);
       })
       .catch((error) => {
+        window.location.href = "/logIn";
         console.error(error);
       });
 
@@ -526,9 +527,9 @@ bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/4
             </div>
           )}
 
-          {aiChatOpen&&(
+          {aiChatOpen && (
             <AiAssistantOptions
-            onClose={()=>setAiChatOpen(false)}
+              onClose={() => setAiChatOpen(false)}
             />
           )}
 

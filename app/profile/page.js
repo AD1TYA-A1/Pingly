@@ -66,6 +66,10 @@ export default function Profile() {
 
       })
       .catch((err) => {
+        const status = error.response?.status;
+        if (status === 401)
+          router.push("/logIn");
+
         console.error(err);
       })
   }, []);

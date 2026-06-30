@@ -13,6 +13,7 @@ export default function SignUp() {
   const router = useRouter();
   const [loggingIn, setLoggingIn] = useState(false)
   const [resetPassword, setResetPassword] = useState(true)
+  const [resetPasswordFlag, setResetPasswordFlag] = useState(false)
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
   //Contains BG effect 
@@ -214,11 +215,19 @@ export default function SignUp() {
 
             </div>
             {resetPassword && <div className="text-center mt-2">
-              <div className="text-white/40 text-sm">
+              <div className="text-white/40 text-sm flex items-center justify-center flex-col">
                 Forgot your password?{" "}
-                <div onClick={() => { router.push("/resetPassword") }} className="text-yellow-400 hover:underline cursor-pointer font-semibold">
+                <button
+                  disabled={resetPasswordFlag}
+                  onClick={() => {
+                    setResetPasswordFlag(true)
+                    router.push("/resetPassword")
+                  }} className={`  
+                 disabled:cursor-not-allowed
+                 disabled:text-yellow-600
+                  text-yellow-400 hover:underline cursor-pointer font-semibold`}>
                   Click here to reset
-                </div>
+                </button>
               </div>
             </div>}
 

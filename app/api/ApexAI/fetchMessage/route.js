@@ -11,7 +11,7 @@ export async function POST(req) {
         const cookieStore = await cookies()
         const client = await clientPromise
         const db = client.db("adminChat")
-        const body = await req.json()
+        // const body = await req.json()
         const token = cookieStore.get('token')?.value;
         if (!token) {
             return NextResponse.json({ success: false, message: "No Token!!" })
@@ -19,29 +19,37 @@ export async function POST(req) {
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET)
         const userId = decoded.userId
-        const lastId = body.lastId
+        // const lastId = body.lastId
 
 
         const conversation = await db.collection("conversationsWithAPEX").findOne({
             user: new ObjectId(userId)
         });
 
-        console.log(conversation);
+        // console.log(conversation);
 
         if (!conversation) {
             return NextResponse.json({ "success": false, message: "User Not Found" }, { status: 201 })
         }
 
-        console.log(conversation._id);
+        console.log(conversation);
 
         const conversationId = conversation._id
+        console.log(conversationId);
+        
+
+
+        // const chats = await db.collection("chatsWithApex").find({
+        //     conversationId: new ObjectId(conversationId),
+        //     ...(lastId && { _id: { $lt: new ObjectId(lastId) } })   // Spread operator helped me to use if else in just one Line
+        // }).sort({ _id: -1 }) // Newest IDs first (Descending)
+        //     .limit(5).toArray()
 
 
         const chats = await db.collection("chatsWithApex").find({
-            conversationId: new ObjectId(conversationId),
-            ...(lastId && { _id: { $lt: new ObjectId(lastId) } })   // Spread operator helped me to use if else in just one Line
-        }).sort({ _id: -1 }) // Newest IDs first (Descending)
-            .limit(5).toArray()
+            conversationId: new ObjectId(conversationId)
+        }).sort({_id:-1}).toArray()
+
 
         console.log(chats);
 
