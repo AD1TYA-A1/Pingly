@@ -194,7 +194,7 @@ export default function Profile() {
 
             {/* Description */}
             <p className="text-sm text-[#888] leading-relaxed mb-7">
-              You'll be signed out of your account. Any unsaved changes will be lost.
+              {"You'll be signed out of your account. Any unsaved changes will be lost."}
             </p>
 
             {/* Actions */}
@@ -333,7 +333,7 @@ export default function Profile() {
 
           {/* Tagline */}
           {user.tagline && (
-            <p className="px-1 text-amber-400/75 text-sm italic mb-3 font-medium">"{user.tagline}"</p>
+            <p className="px-1 text-amber-400/75 text-sm italic mb-3 font-medium">{"{user.tagline}"}</p>
           )}
 
           {/* Bio */}

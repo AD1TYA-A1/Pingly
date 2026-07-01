@@ -8,7 +8,7 @@ import UsersLoadingSkeleton from '../components/sideBarSkeleton/page'
 import AiAssistantOptions from '../components/AIToggler/AiAssistantOptions'
 
 
-const page = () => {
+const Page = () => {
   // const chatters = [];
   const [chattersLoading, setChattersLoading] = useState(true)
 
@@ -607,4 +607,4 @@ bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/4
   )
 }
 
-export default page
+export default Page

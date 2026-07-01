@@ -303,7 +303,7 @@ export default function ResetPassword() {
                                         <span className="text-yellow-400">Password?</span>
                                     </div>
                                     <p className="text-white/30 text-xs font-light leading-relaxed max-w-[220px] mx-auto">
-                                        Enter your username and we'll sort you out.
+                                        {"Enter your username and we'll sort you out."}
                                     </p>
                                 </div>
 

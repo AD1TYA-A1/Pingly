@@ -20,7 +20,7 @@ const { io } = require("socket.io-client");
 const socket = io("http://localhost:5000");
 
 
-const page = () => {
+const Page = () => {
     const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [roomId, setRoomId] = useState("");
@@ -197,4 +197,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page

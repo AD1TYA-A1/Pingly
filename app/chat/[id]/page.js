@@ -10,7 +10,7 @@ import ChatLoadingSkeleton from '@/app/components/Chatskeleton/page'
 import UsersLoadingSkeleton from '@/app/components/sideBarSkeleton/page'
 import AiAssistantOptions from '@/app/components/AIToggler/AiAssistantOptions'
 
-const page = () => {
+const Page = () => {
 
     // const formattedDate = `${yyyy}-${mm}-${dd}`;
     // console.log(formattedDate);
@@ -1115,4 +1115,4 @@ const page = () => {
     )
 }
 
-export default page
+export default Page
