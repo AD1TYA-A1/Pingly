@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 export const metadata = {
   title: "Adm1n Chats",
   verification: {
-    google: "uDS4QmI4sYhzd7YTGQ-cvAvAOS9OaZbWMMQqA_zuDJc"
+    google: "uDS4QmI4sYhzd7YTGQ-cvAvAOS9OaZbWMMQqA_zuDJc" //Adding Verification
   },
   description: "A modern real-time messaging platform with AI-powered assistance."
 };
