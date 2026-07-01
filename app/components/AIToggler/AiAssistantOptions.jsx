@@ -1,7 +1,24 @@
 // components/AiAssistantOptions.jsx
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+
 export default function AiAssistantOptions({ onClose }) {
     const router = useRouter()
+    const [isProfessionalDisabled, setIsProfessionalDisabled] = useState(false)
+    const [isCasualDisabled, setIsCasualDisabled] = useState(false)
+
+    const handleProfessionalClick = () => {
+        if (isProfessionalDisabled) return
+        setIsProfessionalDisabled(true)
+        router.push("/chatAssist/professional")
+    }
+
+    const handleCasualClick = () => {
+        if (isCasualDisabled) return
+        setIsCasualDisabled(true)
+        router.push("/chatAssist/casual")
+    }
+
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
             <div className="relative w-full max-w-xl bg-[#111] border border-[#2a2a2a] rounded-2xl p-5 sm:p-7 max-h-[90vh] overflow-y-auto">
@@ -37,10 +54,13 @@ export default function AiAssistantOptions({ onClose }) {
 
                     {/* Professional Mode */}
                     <div
-                        onClick={() => {
-                            router.push("/chatAssist/professional")
-                        }}
-                        className="group bg-[#0f0f0f] border border-amber-600 rounded-xl p-4 sm:p-5 flex flex-col gap-3 cursor-pointer hover:bg-[#1c1107] transition-colors"
+                        onClick={handleProfessionalClick}
+                        aria-disabled={isProfessionalDisabled}
+                        className={`group bg-[#0f0f0f] border border-amber-600 rounded-xl p-4 sm:p-5 flex flex-col gap-3 transition-colors ${
+                            isProfessionalDisabled
+                                ? "opacity-50 cursor-not-allowed pointer-events-none"
+                                : "cursor-pointer hover:bg-[#1c1107]"
+                        }`}
                     >
                         <div className="flex items-center justify-between">
                             <span className="text-amber-400 text-xs font-medium tracking-widest uppercase">
@@ -64,18 +84,22 @@ export default function AiAssistantOptions({ onClose }) {
                         </div>
 
                         <button
-                            className="cursor-pointer mt-1 w-full py-2.5 bg-amber-500 hover:bg-amber-400 rounded-lg text-[#0a0a0a] text-xs font-semibold tracking-widest uppercase transition-colors"
+                            disabled={isProfessionalDisabled}
+                            className="mt-1 w-full py-2.5 bg-amber-500 hover:bg-amber-400 disabled:hover:bg-amber-500 disabled:cursor-not-allowed rounded-lg text-[#0a0a0a] text-xs font-semibold tracking-widest uppercase transition-colors"
                         >
-                            Launch Professional
+                            {isProfessionalDisabled ? "Launching..." : "Launch Professional"}
                         </button>
                     </div>
 
                     {/* Casual Mode */}
                     <div
-                        onClick={() => {
-                            router.push("/chatAssist/casual")
-                        }}
-                        className="group relative bg-[#0a0a0f] border border-[#1e2a3a] hover:border-sky-500/60 rounded-xl p-4 sm:p-5 flex flex-col gap-3 cursor-pointer transition-all duration-300 hover:shadow-[0_0_24px_rgba(56,189,248,0.08)] overflow-hidden"
+                        onClick={handleCasualClick}
+                        aria-disabled={isCasualDisabled}
+                        className={`group relative bg-[#0a0a0f] border border-[#1e2a3a] rounded-xl p-4 sm:p-5 flex flex-col gap-3 transition-all duration-300 overflow-hidden ${
+                            isCasualDisabled
+                                ? "opacity-50 cursor-not-allowed pointer-events-none"
+                                : "cursor-pointer hover:border-sky-500/60 hover:shadow-[0_0_24px_rgba(56,189,248,0.08)]"
+                        }`}
                     >
                         <div className="absolute -top-6 -left-6 w-24 h-24 bg-sky-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-sky-500/20 transition-all duration-500" />
 
@@ -110,9 +134,10 @@ export default function AiAssistantOptions({ onClose }) {
                         </div>
 
                         <button
-                            className="cursor-pointer mt-1 w-full py-2.5 bg-sky-950/30 border border-sky-700/40 hover:bg-sky-500/10 hover:border-sky-500/70 rounded-lg text-sky-300 text-xs font-semibold tracking-widest uppercase transition-all duration-200"
+                            disabled={isCasualDisabled}
+                            className="mt-1 w-full py-2.5 bg-sky-950/30 border border-sky-700/40 hover:bg-sky-500/10 hover:border-sky-500/70 disabled:hover:bg-sky-950/30 disabled:hover:border-sky-700/40 disabled:cursor-not-allowed rounded-lg text-sky-300 text-xs font-semibold tracking-widest uppercase transition-all duration-200"
                         >
-                            Launch Casual
+                            {isCasualDisabled ? "Launching..." : "Launch Casual"}
                         </button>
                     </div>
                 </div>

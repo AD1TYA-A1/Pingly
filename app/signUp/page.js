@@ -8,6 +8,9 @@ export default function SignUp() {
   const [showPassword, setShowPassword] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
   const [form, setForm] = useState({ userName: "", email: "", password: "", otp: "" });
+  const [isSubmitting, setIsSubmitting] = useState(false); // for "Create account"
+  const [isSendingOtp, setIsSendingOtp] = useState(false); // for "Send OTP"
+
   const canvasRef = useRef(null);
   const router = useRouter();
 
@@ -139,6 +142,8 @@ export default function SignUp() {
         // transition: Bounce,
       });
     }
+
+    setIsSubmitting(true);
     let otpPayload = {
       email: form.email,
       otp: form.otp
@@ -199,6 +204,7 @@ export default function SignUp() {
           });
 
       } else {
+        setIsSubmitting(false)
         return toast.error("Invalid OTP 😵", {
           position: "top-right",
           autoClose: 5000,
@@ -207,6 +213,7 @@ export default function SignUp() {
 
       }
     }).catch((error) => {
+      setIsSubmitting(false);
       // ❌ Network error
       toast.error("Network error. Try again 😵", {
         position: "top-right",
@@ -219,7 +226,7 @@ export default function SignUp() {
 
 
 
-    
+
 
 
   };
@@ -241,7 +248,7 @@ export default function SignUp() {
         // transition: Bounce,
       });
     }
-
+    setIsSendingOtp(true);
     await fetch("/api/sendOtp", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -278,8 +285,11 @@ export default function SignUp() {
         // setOtpSent(true);
 
       }
+
+      setIsSendingOtp(false)
     }) // This is the actual API response;
       .catch(error => console.error(error));
+    setIsSendingOtp(false)
   };
 
 
@@ -347,14 +357,13 @@ export default function SignUp() {
                   />
                   <button
                     onClick={sendOtp}
-                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200 cursor-pointer whitespace-nowrap
-                    ${otpSent
+                    disabled={otpSent || isSendingOtp}
+                    className={`px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-200
+    ${otpSent || isSendingOtp
                         ? "bg-white/10 text-white/40 cursor-not-allowed"
-                        : "bg-amber-400 hover:bg-amber-300 text-black active:scale-95"
-                      }`}
-                    disabled={otpSent}
+                        : "bg-amber-400 hover:bg-amber-300 text-black active:scale-95 cursor-pointer"}`}
                   >
-                    {otpSent ? "Sent ✓" : "Send OTP"}
+                    {otpSent ? "Sent ✓" : isSendingOtp ? "Sending..." : "Send OTP"}
                   </button>
                 </div>
               </div>
@@ -425,9 +434,15 @@ export default function SignUp() {
             </div>
 
             {/* Submit */}
-            <button className="
-            w-full mt-7 bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black font-semibold py-3 rounded-xl text-sm tracking-wide transition-all duration-200 cursor-pointer shadow-lg shadow-amber-400/20 " onClick={submit}>
-              Create account
+            <button
+              onClick={submit}
+              disabled={isSubmitting}
+              className={`w-full mt-7 font-semibold py-3 rounded-xl text-sm tracking-wide transition-all duration-200 shadow-lg
+    ${isSubmitting
+                  ? "bg-amber-400/40 text-black/50 cursor-not-allowed shadow-none"
+                  : "bg-amber-400 hover:bg-amber-300 active:scale-[0.98] text-black cursor-pointer shadow-amber-400/20"}`}
+            >
+              {isSubmitting ? "Creating account..." : "Create account"}
             </button>
 
             {/* Divider */}
