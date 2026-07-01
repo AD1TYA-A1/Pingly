@@ -15,6 +15,7 @@ const page = () => {
     // const formattedDate = `${yyyy}-${mm}-${dd}`;
     // console.log(formattedDate);
 
+    let lastDate = null
     const [aiChatOpen, setAiChatOpen] = useState(false);
 
     const scrollBottom = useRef()
@@ -348,45 +349,33 @@ const page = () => {
 
 
     function relativeDates(date) {
-        if (lastDocDate.current === date) return null; // ← same date = no separator
+        const msgDate = new Date(date);
+        const today = new Date();
 
-        //GET MONTH, DATE , YEAR FROM SPLITIING DATE STRING
-        let label = ""
-        let d = date.split("-")[2]
-        let m = date.split("-")[1]
-        let yy = date.split("-")[0]
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
 
+        const isSameDay = (a, b) =>
+            a.getDate() === b.getDate() &&
+            a.getMonth() === b.getMonth() &&
+            a.getFullYear() === b.getFullYear();
 
-        // if (d + 1 == dd && m == mm && yy == yyyy && dateSeperator != "Today") {
-        //     label = "Today"
-
-        // } else if (m == mm && yy == yyyy && dateSeperator != "Yesterday") {
-        //     // if (d <) {l
-
-        //     // }
-        //     setDateSeperator("Yesterday")
-        // } else if (lastDocDate != date) {
-        //     setDateSeperator(`${d},${m}`)
-        //     return true
-        // }
-        // return false
-
-        if (Number(d) + 1 == dd && m == mm && yy == yyyy) {
+        let label;
+        if (isSameDay(msgDate, today)) {
             label = "Today";
-        } else if (m == mm && yy == yyyy) {
+        } else if (isSameDay(msgDate, yesterday)) {
             label = "Yesterday";
         } else {
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-            label = `${d}-${months[m - 1]}`;
+            const months = [
+                "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+            ];
+            label = `${msgDate.getDate()}-${months[msgDate.getMonth()]}`;
         }
-        // console.log(label);
 
-
-        lastDocDate.current = date; // update ref
-        return label; // ← new date = return label string
+        return label;
     }
+
 
     const isLoadingMore = useRef(false);
     const scrollToBottom = () => {
@@ -999,7 +988,6 @@ const page = () => {
                                 <div className="flex justify-center cursor-pointer" onClick={handleScroll}>
                                     <span className="text-white/40 text-[10px] bg-white/[0.04] px-3 py-1 rounded-full">{moreMessagesPresentOrNot ? "Scroll Up To Load More" : "Your Caught Up"}</span>
                                 </div>
-
                                 {myChats.map((chat) => {
                                     // console.log(chat.sender);
                                     // console.log(chat);
@@ -1008,9 +996,10 @@ const page = () => {
 
 
                                     date = chat.date.split("T")[0]
-                                    const seperator = relativeDates(date)
                                     // console.log(date);
-
+                                    const showSeperator = date !== lastDate;
+                                    const seperator = showSeperator ? relativeDates(date) : null;
+                                    lastDate = date; // update for next iteration
 
                                     const isMe = chat.sender === user._id; // or however you store logged-in user id
                                     return (
@@ -1102,7 +1091,7 @@ const page = () => {
                                         ref={inputRef}
                                         onKeyDown={(e) => {
                                             if (e.key == "Enter") {
-                                                sendMessage
+                                                sendMessage()
                                             }
                                         }}
                                         type="text"

@@ -11,7 +11,11 @@ export async function POST(req) {
   // 1. Generate OTP
   const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
+
+
   try {
+
+    
 
     //Checking if email is Alreaady in use or not
     const doUserNameExists = await db.collection("users").findOne({ email: email })
