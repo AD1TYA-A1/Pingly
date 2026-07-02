@@ -333,7 +333,7 @@ export default function Profile() {
 
           {/* Tagline */}
           {user.tagline && (
-            <p className="px-1 text-amber-400/75 text-sm italic mb-3 font-medium">{"{user.tagline}"}</p>
+            <p className="px-1 text-amber-400/75 text-sm italic mb-3 font-medium">{user.tagline}</p>
           )}
 
           {/* Bio */}
