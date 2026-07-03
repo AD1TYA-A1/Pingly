@@ -25,7 +25,7 @@ export async function POST(req) {
         { email: decoded.email }, // ideally send this from frontend
         {
             $set: {
-                userName: form.userName,
+                userName:body.userName,
                 bio: form.bio,
                 avatarUrl: form.avatarUrl,
                 avatarColor: form.avatarColor,

@@ -75,7 +75,7 @@ export default function SignUp() {
       });
     }
 
-    if (!form.userName) {
+    if (!form.userName || form.userName.trim()=="") {
       return toast("No username? Come on 😏", {
         position: "top-right",
         autoClose: 5000,
@@ -159,6 +159,8 @@ export default function SignUp() {
       const result = await response.json();
       console.log(result);
       if (result.verification === "success") {
+        // console.log(newBody);
+        
         await fetch("/api/auth/register", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
