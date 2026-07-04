@@ -703,7 +703,8 @@ const Page = () => {
 
 
         inputRef.current.value = ""
-        console.log("Message Sent!!!!!");
+            inputRef.current?.focus()
+        // console.log("Message Sent!!!!!");
     }
 
     return (
@@ -1088,6 +1089,7 @@ const Page = () => {
                             <div className=" flex-shrink-0 px-4 py-4 border-t border-white/[0.06] bg-[#0a0a0a]">
                                 <div className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl px-4 py-3">
                                     <input
+                                    autoFocus
                                         ref={inputRef}
                                         onKeyDown={(e) => {
                                             if (e.key == "Enter") {
