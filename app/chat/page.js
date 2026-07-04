@@ -6,8 +6,8 @@ import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import UsersLoadingSkeleton from '../components/sideBarSkeleton/page'
 import AiAssistantOptions from '../components/AIToggler/AiAssistantOptions'
-
-
+import EnableNotifications from '../components/Enablenotifications'
+import NotificationPermissionPrompt from '../components/NotificationPermissionPrompt/page'
 const Page = () => {
   // const chatters = [];
   const [chattersLoading, setChattersLoading] = useState(true)
@@ -261,6 +261,8 @@ const Page = () => {
 
   return (
     <>
+      <EnableNotifications />
+      <NotificationPermissionPrompt />
       <div className="flex w-screen h-screen bg-[#080808] overflow-hidden">
 
         {/* ── SIDEBAR ── */}

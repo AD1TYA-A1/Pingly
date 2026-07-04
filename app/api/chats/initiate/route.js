@@ -3,6 +3,7 @@ import clientPromise from "@/app/lib/mongodb";
 import { cookies } from "next/headers";
 import jwt from 'jsonwebtoken';
 import { ObjectId } from "mongodb";
+import { sendPushNotification } from "@/app/lib/sendPushNotification";
 
 export async function POST(req) {
     try {
@@ -21,10 +22,6 @@ export async function POST(req) {
         // In body I want objectID of user I want to chat with 
         console.log(otherID);
 
-
-
-
-
         console.log(decoded.userId);
 
         // Sort so order never matters
@@ -37,7 +34,7 @@ export async function POST(req) {
         if (!conversation) {
             const result = await db.collection("conversations").insertOne({
                 participants,
-                lastMessage:body.lastMessage,
+                lastMessage: body.lastMessage,
                 createdAt: new Date()
             }, { returnDocument: "after" });
 
@@ -49,8 +46,6 @@ export async function POST(req) {
 
         }
 
-
-
         const conversationId = conversation._id;
 
         await db.collection("chats").insertOne({
@@ -60,6 +55,17 @@ export async function POST(req) {
             message: body.message,
             date: new Date()
         });
+
+        // Look up sender's name/username to show in the notification
+        const senderUser = await db.collection("users").findOne({ _id: myID });
+        const senderName = senderUser?.userName || senderUser?.name || "New message";
+
+        // Fire push notification to the receiver (don't block the response on this)
+        sendPushNotification(body.otherID, {
+            title: senderName,
+            body: body.message,
+            data: { conversationId: conversationId.toString() },
+        }).catch((err) => console.error("Push notification error:", err));
 
         return NextResponse.json({ success: true, conversationId }, { status: 200 })
     } catch (error) {
