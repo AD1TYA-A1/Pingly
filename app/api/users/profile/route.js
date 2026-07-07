@@ -9,10 +9,10 @@ export async function POST(req) {
     console.log(body);
     const form = body;
     
-    console.log("YOUR FORM");
+    // console.log("YOUR FORM");
 
-    console.log(form);
-    console.log("YOUR FORM");
+    // console.log(form);
+    // console.log("YOUR FORM");
 
     const token = cookieStore.get('token')?.value;
     const decoded = jwt.verify(token, process.env.JWT_SECRET);

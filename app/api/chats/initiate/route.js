@@ -56,6 +56,23 @@ export async function POST(req) {
             date: new Date()
         });
 
+        // const conversation2 = await db.collection("conversations").findOne({
+        //     _id: new Object(conversationId)
+        // })
+        // console.log("conversation2", conversation2);
+
+
+        await db.collection("conversations").updateOne({
+            _id: new Object(conversationId)
+        }, {
+            $set: {
+                lastMessage: body.message,
+                createdAt: new Date()
+            }
+        })
+
+
+
         // Look up sender's name/username to show in the notification
         const senderUser = await db.collection("users").findOne({ _id: myID });
         const senderName = senderUser?.userName || senderUser?.name || "New message";

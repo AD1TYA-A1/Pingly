@@ -6,7 +6,7 @@ import jwt, { decode } from 'jsonwebtoken';
 // USED IN CHAT ENDPOINT TO SEE IF I HAVE CHATTED WITH ANYONE OR NOT
 export async function GET() {
     try {
-        const cookieStore = await cookies(); 
+        const cookieStore = await cookies();
 
         const client = await clientPromise
         const db = await client.db("adminChat")
@@ -19,7 +19,10 @@ export async function GET() {
         // FINDING ALL F USERS CHAT IF PRESENT
         const conversations = await db.collection("conversations").find({
             participants: decoded.userId
-        }).toArray()
+        }).sort({ "createdAt": -1 }).toArray()
+
+        console.log(conversations);
+
         //.find() does NOT directly return the actual data.
         // It returns a:
         //     Cursor
@@ -50,7 +53,7 @@ export async function GET() {
                 conversations
             })
 
-            
+
         }
     } catch (error) {
         return NextResponse.json({
