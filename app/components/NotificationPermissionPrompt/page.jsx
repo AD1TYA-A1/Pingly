@@ -12,7 +12,16 @@ export default function NotificationPermissionPrompt() {
   const [permissionState, setPermissionState] = useState("default");
   const [saving, setSaving] = useState(false);
 
+
   useEffect(() => {
+
+    console.log(permissionState);
+
+  }, [permissionState])
+
+
+  useEffect(() => {
+
     if (typeof window === "undefined" || !("Notification" in window)) return;
 
     const currentPermission = Notification.permission; // "default" | "granted" | "denied"
@@ -43,6 +52,8 @@ export default function NotificationPermissionPrompt() {
   const handleEnableClick = async () => {
     setSaving(true);
     const token = await requestNotificationPermission();
+    console.log(token);
+    
     setSaving(false);
 
     if (token) {
@@ -54,6 +65,7 @@ export default function NotificationPermissionPrompt() {
       setPermissionState(Notification.permission);
       localStorage.setItem(STORAGE_KEY, String(Date.now()));
     }
+    handleDismiss()
   };
 
   if (!visible) return null;
@@ -94,7 +106,7 @@ export default function NotificationPermissionPrompt() {
       )}
 
       <div className="flex gap-2.5">
-        {permissionState !== "denied" && (
+        {permissionState === "denied" && (
           <button
             onClick={handleEnableClick}
             disabled={saving}
