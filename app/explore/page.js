@@ -479,7 +479,7 @@ export default function ExplorePage() {
       .request({
         method: "get",
         maxBodyLength: Infinity,
-        url: "api/users/getAllUsers",
+        url: "api/users/getAllUsersForExplore",
         headers: {},
       })
       .then((response) => {
