@@ -703,7 +703,7 @@ const Page = () => {
 
 
         inputRef.current.value = ""
-            inputRef.current?.focus()
+        inputRef.current?.focus()
         // console.log("Message Sent!!!!!");
     }
 
@@ -738,8 +738,19 @@ const Page = () => {
                             router.push("/profile")
                         }}>
                             <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
-                                <img src={user.avatarUrl} alt="profile" className=' w-full h-full rounded-4xl' />
-                            </div>
+                                <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
+                                    {user.avatarUrl ? (
+                                        <img
+                                            src={user.avatarUrl}
+                                            alt="profile"
+                                            className="w-full h-full rounded-4xl"
+                                        />
+                                    ) : (
+                                        <span className="text-amber-400 font-medium">
+                                            {user.userName?.charAt(0).toUpperCase() || "?"}
+                                        </span>
+                                    )}
+                                </div>                            </div>
                             <span className="text-white/50 text-[11px] font-medium">{user.userName}</span>
                         </div>
 
@@ -857,8 +868,19 @@ const Page = () => {
                                 router.push("/profile")
                             }}>
                                 <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
-                                    <img src={user.avatarUrl} alt="profile" className=' w-full h-full rounded-4xl' />
-                                </div>
+                                    <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
+                                        {user.avatarUrl ? (
+                                            <img
+                                                src={user.avatarUrl}
+                                                alt="profile"
+                                                className="w-full h-full rounded-4xl"
+                                            />
+                                        ) : (
+                                            <span className="text-amber-400 font-medium">
+                                                {user.userName?.charAt(0).toUpperCase() || "?"}
+                                            </span>
+                                        )}
+                                    </div>                                </div>
                                 <span className="text-white/50 text-[11px] font-medium">{user.userName}</span>
                             </div>
                             {/* ✅ New button */}
@@ -1089,7 +1111,7 @@ const Page = () => {
                             <div className=" flex-shrink-0 px-4 py-4 border-t border-white/[0.06] bg-[#0a0a0a]">
                                 <div className="flex items-center gap-3 bg-white/[0.04] border border-white/[0.08] rounded-2xl px-4 py-3">
                                     <input
-                                    autoFocus
+                                        autoFocus
                                         ref={inputRef}
                                         onKeyDown={(e) => {
                                             if (e.key == "Enter") {

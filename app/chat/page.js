@@ -292,7 +292,19 @@ const Page = () => {
               router.push("/profile")
             }}>
               <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
-                <img src={user.avatarUrl} alt="profile" className=' w-full h-full rounded-4xl' />
+                <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
+                  {user.avatarUrl ? (
+                    <img
+                      src={user.avatarUrl}
+                      alt="profile"
+                      className="w-full h-full rounded-4xl"
+                    />
+                  ) : (
+                    <span className="text-amber-400 font-medium">
+                      {user.userName?.charAt(0).toUpperCase() || "?"}
+                    </span>
+                  )}
+                </div>
               </div>
               <span className="text-white/50 text-[11px] font-medium">{user.userName}</span>
             </div>
@@ -408,8 +420,19 @@ bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/4
                   router.push("/profile")
                 }}>
                   <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
-                    <img src={user.avatarUrl} alt="profile" className=' w-full h-full rounded-4xl' />
-                  </div>
+                    <div className="w-6 h-6 rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
+                      {user.avatarUrl ? (
+                        <img
+                          src={user.avatarUrl}
+                          alt="profile"
+                          className="w-full h-full rounded-4xl"
+                        />
+                      ) : (
+                        <span className="text-amber-400 font-medium">
+                          {user.userName?.charAt(0).toUpperCase() || "?"}
+                        </span>
+                      )}
+                    </div>                  </div>
                   <span className="text-white/50 text-[11px] font-medium">{user.userName}</span>
                 </div>
 

@@ -8,7 +8,7 @@ export async function POST(req) {
     const body = await req.json();
     console.log(body);
     const form = body;
-    
+
     // console.log("YOUR FORM");
 
     // console.log(form);
@@ -20,25 +20,49 @@ export async function POST(req) {
     const client = await clientPromise
     const db = await client.db("adminChat")
 
+    if (body.userName) {
+        console.log("UserName Line 24", body.userName);
 
-    const update = await db.collection("users").updateOne(
-        { email: decoded.email }, // ideally send this from frontend
-        {
-            $set: {
-                userName:body.userName,
-                bio: form.bio,
-                avatarUrl: form.avatarUrl,
-                avatarColor: form.avatarColor,
-                status: form.status,
-                tagline: form.tagline,
-                displayName:form.displayName,
-                emoji: form.emoji,
-                updatedAt: new Date()
+        await db.collection("users").updateOne(
+            { email: decoded.email }, // ideally send this from frontend
+            {
+                $set: {
+                    userName: body.userName,
+                    bio: form.bio,
+                    avatarUrl: form.avatarUrl,
+                    avatarColor: form.avatarColor,
+                    status: form.status,
+                    tagline: form.tagline,
+                    displayName: form.displayName,
+                    emoji: form.emoji,
+                    updatedAt: new Date()
+                }
             }
-        }
-    )
+        )
+    }
+    else {
+        console.log("UserName Line 44", body.userName);
 
-    console.log(update);
+        await db.collection("users").updateOne(
+            { email: decoded.email }, // ideally send this from frontend
+            {
+                $set: {
+                    // userName: body.userName,
+                    bio: form.bio,
+                    avatarUrl: form.avatarUrl,
+                    avatarColor: form.avatarColor,
+                    status: form.status,
+                    tagline: form.tagline,
+                    displayName: form.displayName,
+                    emoji: form.emoji,
+                    updatedAt: new Date()
+                }
+            }
+        )
+    }
+
+
+    // console.log(update);
 
     return NextResponse.json({ success: true, message: "All Set" }, { status: 200 })
 

@@ -184,6 +184,8 @@ export default function Onboarding() {
 
     try {
       let data = JSON.stringify({ ...form, avatarUrl: avatarURL });
+      console.log(data);
+      
       let config = {
         method: "post",
         maxBodyLength: Infinity,
