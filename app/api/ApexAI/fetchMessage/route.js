@@ -35,7 +35,7 @@ export async function POST(req) {
         console.log(conversation);
 
         const conversationId = conversation._id
-        console.log(conversationId);
+        // console.log(conversationId);
         
 
 

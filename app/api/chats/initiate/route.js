@@ -53,6 +53,7 @@ export async function POST(req) {
             sender: myID,
             receiver: otherID,
             message: body.message,
+            status:"delivered",
             date: new Date()
         });
 

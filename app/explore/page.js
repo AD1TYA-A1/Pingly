@@ -474,22 +474,58 @@ export default function ExplorePage() {
   const [search, setSearch] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
 
-  useEffect(() => {
-    axios
-      .request({
-        method: "get",
-        maxBodyLength: Infinity,
-        url: "api/users/getAllUsersForExplore",
-        headers: {},
-      })
+  const [lastId, setLastId] = useState("")
+  const [loadMoreFlag, setLoadMoreFlag] = useState(false)
+  const [moreAvailable, setMoreAvailable] = useState(true)
+
+
+  // useEffect(() => {
+  //   console.log(myUsers);
+  // }, [myUsers])
+
+
+  const handleLoadMoreUsers = () => {
+    setLoadMoreFlag(true)
+    let data = JSON.stringify({
+      "lastId": lastId
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: '/api/users/getAllUsersForExplore',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data
+    };
+
+    axios.request(config)
       .then((response) => {
-        setMyUsers(response.data.users || []);
+        console.log((response.data));
+        setMyUsers((prevUsers) => {
+          const currentList = prevUsers || [];
+          return [...currentList, ...response.data.users]
+        })
+        if (lastId == response.data.lastId) {
+          setMoreAvailable(false)
+          return
+        }
+        setLastId(response.data.lastId)
+        setLoadMoreFlag(false)
         setLoading(false);
+        setLoadMoreFlag(false)
       })
       .catch((error) => {
         console.log(error);
+        setLoadMoreFlag(false)
         setLoading(false);
       });
+
+  }
+  useEffect(() => {
+    handleLoadMoreUsers()
+
   }, []);
 
   const filtered = myUsers.filter((u) => {
@@ -703,19 +739,38 @@ export default function ExplorePage() {
               ))}
             </div>
           ) : filtered.length > 0 ? (
-            <div
-              className="grid gap-3"
-              style={{ gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))" }}
-            >
-              {filtered.map((user, i) => (
-                <UserCard
-                  key={user._id}
-                  user={user}
-                  onClick={setSelectedUser}
-                  index={i}
-                />
-              ))}
-            </div>
+            <>
+              <div
+                className="grid gap-3"
+                style={{ gridTemplateColumns: "repeat(auto-fill, minmax(175px, 1fr))" }}
+              >
+                {filtered.map((user, i) => (
+                  <UserCard
+                    key={user._id}
+                    user={user}
+                    onClick={setSelectedUser}
+                    index={i}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-center py-6">
+                <button
+                  onClick={() => {
+                    setLoadMoreFlag(true)
+                    handleLoadMoreUsers()
+                  }}
+                  disabled={!moreAvailable || loadMoreFlag}
+                  className={`px-6 py-2.5 rounded-lg text-sm font-bold tracking-wide uppercase transition-all duration-200 ${moreAvailable && !loadMoreFlag
+                    ? "bg-amber-500 text-black hover:bg-amber-400 active:scale-95 cursor-pointer"
+                    : "bg-zinc-900 text-zinc-500 border border-zinc-800 cursor-not-allowed"
+                    }
+                    {}
+                    `}
+                >
+                  {loadMoreFlag ? moreAvailable ? "Loading..." : "You Have Reached End" : "Load More"}
+                </button>
+              </div>
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center py-28">
               <div
