@@ -258,11 +258,20 @@ const Page = () => {
                             console.log(error);
                         });
 
+                } else {
+                    // 🔧 FIX: no conversation exists yet — this is a brand-new
+                    // chat. Before, `laodingChats` was only ever set to false
+                    // INSIDE the `if` above, so for a new chat it stayed `true`
+                    // forever and the empty-state kept showing the loading
+                    // skeleton instead of the "start a conversation" prompt.
+                    setlaodingChats(false)
+                    setHaveChattedWithUser(false)
                 }
 
             })
             .catch((error) => {
                 console.log(error);
+                setlaodingChats(false)
             });
     }
 
@@ -661,15 +670,31 @@ const Page = () => {
         let myMessage = inputRef.current.value.trim();
         axios.request(config)
             .then((response) => {
-                console.log(response.data);
-                console.log(myMessage);
-                console.log(myMessage);
+                // console.log(response.data);
+                // console.log(myMessage);
+                // console.log(myMessage);
+
+                // 🔧 FIX — this is the actual bug:
+                // When starting a brand-new chat, `haveChattedWithUser` is false
+                // and `roomId` is "" because getMyConversationWithUser() never
+                // found an existing conversation to attach to. The
+                // /api/chats/initiate call above just CREATED that conversation
+                // on the backend — grab its id from the response so the message
+                // (and the socket room) point at the right conversation.
+                // ⚠️ Adjust the field name(s) below if your /api/chats/initiate
+                // response shape is different (e.g. response.data.newConversationId).
+                const newConversationId =
+                    response.data.conversation?._id ||
+                    response.data.conversationId ||
+                    response.data.conversation;
+
+                const activeRoomId = roomId || newConversationId;
 
                 const msgData = {
                     message: myMessage,
                     socketSender: socket.id,  // who sent it
                     sender: user._id,
-                    room: roomId,
+                    room: activeRoomId,
                     date: new Date().toISOString()
                     // → "2026-06-16T07:27:37.455Z"
                 };
@@ -689,6 +714,17 @@ const Page = () => {
 
 
                 console.log("Setted My chats");
+
+                // 🔧 FIX: flip the UI over from "no conversation / start a
+                // conversation" to the real chat view now that a conversation
+                // exists, and store the room id so future messages + the
+                // socket "join_room" effect (keyed on [roomId]) use it.
+                if (!haveChattedWithUser) {
+                    setHaveChattedWithUser(true)
+                }
+                if (!roomId && activeRoomId) {
+                    setRoomId(activeRoomId)
+                }
 
                 // CONVERSATION ID, senderID, recieverID
                 // API TO GET MESSAGES 
@@ -948,8 +984,15 @@ const Page = () => {
                         </span>
                     </div>
 
-                    {/* Empty state */}
-                    {!haveChattedWithUser && (
+                    {/* Empty state — only when NO user is selected at all.
+                        🔧 FIX: this used to be `!haveChattedWithUser`, which meant
+                        it rendered on top of the real chat panel below for ANY
+                        brand-new conversation (since a new chat also has
+                        haveChattedWithUser === false at first). That's why
+                        starting a new chat looked stuck on "pick someone / start
+                        a conversation" even while the real chat panel (with the
+                        input bar) was rendering underneath it. */}
+                    {!selectedUser && (
                         <div className="flex-1 flex flex-col items-center justify-center relative overflow-hidden">
                             <EmptyStateCanvas />
 
@@ -981,17 +1024,30 @@ const Page = () => {
                             {/* Chat header */}
                             <div className="flex flex-shrink-0 items-center gap-3 px-5 py-4 border-b border-white/[0.06] bg-[#0a0a0a]">
                                 <div className="relative">
-                                    <div onClick={() => {
-                                        router.push(`/profile/${userToChatWith}`)
-                                    }} className=" cursor-pointer w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
-                                        style={{ border: `1.5px solid ${selectedUser[0].status.color}44` }}>
-                                        <img src={selectedUser[0].avatarUrl} className="w-full h-full object-cover" />
+                                    <div
+                                        onClick={() => router.push(`/profile/${userToChatWith}`)}
+                                        className="cursor-pointer w-9 h-9 rounded-full overflow-hidden flex-shrink-0"
+                                        style={{ border: `1.5px solid ${selectedUser[0]?.status?.color || "#525252"}` }}
+                                    >
+                                        {selectedUser[0].avatarUrl ? (
+                                            <img
+                                                src={selectedUser[0].avatarUrl}
+                                                alt="profile"
+                                                className="w-full h-full object-cover rounded-full"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full rounded-full bg-amber-400/30 flex items-center justify-center text-[9px]">
+                                                <span className="text-amber-400 font-medium">
+                                                    {selectedUser[0].userName?.charAt(0).toUpperCase() || "?"}
+                                                </span>
+                                            </div>
+                                        )}
                                     </div>
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0a0a0a]" style={{ background: selectedUser[0].status.color }} />
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#0a0a0a]" style={{ background: selectedUser[0]?.status?.color || "#525252" }} />
                                 </div>
                                 <div>
                                     <p className="text-white text-sm font-semibold">{selectedUser[0].userName}</p>
-                                    <p className="text-white/30 text-xs">{selectedUser[0].status.label}</p>
+                                    <p className="text-white/30 text-xs">{selectedUser[0]?.status?.label || "No status yet"}</p>
                                 </div>
                                 <div className="ml-auto flex gap-2">
                                     <button className="w-8 h-8 rounded-lg bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-white/30 hover:text-white/60 cursor-pointer transition-colors">
@@ -1045,7 +1101,7 @@ const Page = () => {
                                                 {!isMe && (
                                                     <div className="w-6 h-6 rounded-full flex items-center justify-center text-xs flex-shrink-0"
                                                         style={{ background: selectedUser[0].avatarColor }}>
-                                                        {selectedUser[0].emoji}
+                                                        {selectedUser[0]?.emoji || "✨"}
                                                     </div>
                                                 )}
 
@@ -1094,7 +1150,7 @@ const Page = () => {
                             </div>) : (
                                 <div className="flex-1 flex flex-col items-center justify-center gap-3 px-5 py-6">
                                     <div className="w-12 h-12 rounded-full bg-white/[0.04] border border-white/[0.06] flex items-center justify-center text-2xl">
-                                        {selectedUser[0].emoji}
+                                        {selectedUser[0]?.emoji || "👀"}
                                     </div>
                                     <div className="text-center">
                                         <p className="text-white/60 text-sm font-medium">{selectedUser[0].name}</p>

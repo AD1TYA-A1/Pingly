@@ -432,7 +432,8 @@ bg-zinc-800/50 hover:bg-zinc-700/60 border-zinc-700/40 hover:border-yellow-400/4
                           {user.userName?.charAt(0).toUpperCase() || "?"}
                         </span>
                       )}
-                    </div>                  </div>
+                    </div>
+                  </div>
                   <span className="text-white/50 text-[11px] font-medium">{user.userName}</span>
                 </div>
 
