@@ -20,7 +20,7 @@ export async function POST(req) {
     const userMessage = body.userMessage
     try {
         const completion = await groq.chat.completions.create({
-            model: "qwen/qwen3-32b",
+            model: "qwen/qwen3.6-27b",
             messages: [
                 {
                     // time:Date.now(),
